@@ -35,6 +35,11 @@ public class PrefManager {
         editor.commit();
     }
 
+    public void clearSession() {
+        editor.clear();
+        editor.commit();
+    }
+
     public boolean isLoggedIn() {
         return pref.getBoolean(KEY_IS_LOGGED_IN,false);
     }

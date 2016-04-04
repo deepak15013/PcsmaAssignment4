@@ -9,9 +9,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    PrefManager prefManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +28,10 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        /*NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);*/
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        prefManager = new PrefManager(getApplicationContext());
     }
 
     @Override
@@ -69,15 +74,23 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+            Toast.makeText(MainActivity.this, "camera", Toast.LENGTH_SHORT).show();
+
         } else if (id == R.id.nav_gallery) {
+            Toast.makeText(MainActivity.this, "gallery", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_slideshow) {
+            Toast.makeText(MainActivity.this, "slideshow", Toast.LENGTH_SHORT).show();
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_log_out) {
+            Toast.makeText(MainActivity.this, "log out", Toast.LENGTH_SHORT).show();
+            prefManager.clearSession();
 
         } else if (id == R.id.nav_share) {
+            Toast.makeText(MainActivity.this, "share", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_send) {
+            Toast.makeText(MainActivity.this, "send", Toast.LENGTH_SHORT).show();
 
         }
 
