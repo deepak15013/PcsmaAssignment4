@@ -2,11 +2,14 @@ package deepaksood.in.pcsmaassignment4;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 /**
  * Created by deepak on 4/4/16.
  */
 public class PrefManager {
+
+    public static final String TAG = PrefManager.class.getSimpleName();
 
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -28,10 +31,12 @@ public class PrefManager {
     public void createLogin(String mobile) {
         editor.putString(KEY_MOBILE,mobile);
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
+        Log.v(TAG,"changed: true");
+        editor.commit();
     }
 
     public boolean isLoggedIn() {
-        return pref.getBoolean(KEY_IS_LOGGED_IN, false);
+        return pref.getBoolean(KEY_IS_LOGGED_IN,false);
     }
 
 }
