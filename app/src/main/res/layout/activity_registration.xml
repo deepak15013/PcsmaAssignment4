@@ -19,6 +19,14 @@
         android:id="@+id/textView2"
         android:layout_gravity="center_horizontal" />
 
+    <TextView
+        android:id="@+id/registered_mobile_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Registered Mobile Number"
+        android:layout_gravity="center_horizontal"
+        android:padding="16dp"/>
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

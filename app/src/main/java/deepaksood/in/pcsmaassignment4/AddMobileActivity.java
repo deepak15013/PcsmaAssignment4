@@ -101,7 +101,7 @@ public class AddMobileActivity extends AppCompatActivity implements View.OnClick
                 if(mobileNum.getText().toString().length() == 10) {
                     Toast.makeText(AddMobileActivity.this, "next", Toast.LENGTH_SHORT).show();
                     generateMessage();
-                    mobileNumText = countryCode + mobileNum.getText().toString();
+                    mobileNumText = mobileNum.getText().toString();
                     Log.v(TAG,"MoblieNUM: "+mobileNumText);
                     generateURL();
                     //sendOTP();
@@ -122,6 +122,7 @@ public class AddMobileActivity extends AppCompatActivity implements View.OnClick
                         Toast.makeText(AddMobileActivity.this, "validate otp", Toast.LENGTH_SHORT).show();
                         Toast.makeText(AddMobileActivity.this, "Authentication Successful", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(this,RegistrationActivity.class);
+                        intent.putExtra("MOBILE_NUM",mobileNumText);
                         startActivity(intent);
                         finish();
                     }
@@ -152,7 +153,7 @@ public class AddMobileActivity extends AppCompatActivity implements View.OnClick
                 .appendPath("api")
                 .appendPath("sendhttp.php")
                 .appendQueryParameter("authkey",API_KEY)
-                .appendQueryParameter("mobiles",mobileNumText)
+                .appendQueryParameter("mobiles",countryCode+mobileNumText)
                 .appendQueryParameter("message",MESSAGE)
                 .appendQueryParameter("sender",SENDER)
                 .appendQueryParameter("route",ROUTE)
