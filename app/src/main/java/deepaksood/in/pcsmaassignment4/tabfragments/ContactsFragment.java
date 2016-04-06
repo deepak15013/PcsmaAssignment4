@@ -1,6 +1,7 @@
 package deepaksood.in.pcsmaassignment4.tabfragments;
 
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import java.util.ArrayList;
 import java.util.List;
 
+import deepaksood.in.pcsmaassignment4.ChatPackage.ChatOneToOne;
 import deepaksood.in.pcsmaassignment4.MainActivity;
 import deepaksood.in.pcsmaassignment4.R;
 
@@ -67,7 +69,16 @@ public class ContactsFragment extends Fragment {
 
         list = (ListView) view.findViewById(R.id.contacts_list);
 
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                Toast.makeText(getActivity(), "pos: "+contactsList.get(position), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(),ChatOneToOne.class);
+                intent.putExtra("USER_NUMBER",contactsList.get(position));
+                startActivity(intent);
+            }
+        });
 
         list.setAdapter(adapter);
 
@@ -108,12 +119,12 @@ public class ContactsFragment extends Fragment {
             /*for(String i : contactsList) {
                 adapter.add(i);
             }*/
-
+            Log.v(TAG,"onPostExecute");
             String[] contactsArray = new String[contactsList.size()];
             contactsArray = contactsList.toArray(contactsArray);
 
             adapter = new ContactsListAdapter(getActivity(), contactsArray , mobileArray);
-
+            list.setAdapter(adapter);
             super.onPostExecute(s);
 
         }
