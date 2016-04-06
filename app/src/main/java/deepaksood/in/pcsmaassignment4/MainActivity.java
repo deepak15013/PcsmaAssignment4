@@ -1,5 +1,6 @@
 package deepaksood.in.pcsmaassignment4;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -20,6 +21,8 @@ import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBScanExpression;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedScanList;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
-    private String mobileNumText="1234567890";
+    private String mobileNumText="";
 
     UserObject userObject;
 
@@ -75,20 +78,16 @@ public class MainActivity extends AppCompatActivity
 
         prefManager = new PrefManager(getApplicationContext());
 
-        new db().execute();
 
-
-
-        Log.v(TAG,"user: "+userObject.getMobileNum());
 
         Bundle bundle = getIntent().getExtras();
-        /*if(bundle != null) {
+        if(bundle != null) {
             mobileNumText = bundle.getString("MOBILE_NUM");
             Log.v(TAG,"mobile Num TExt: "+mobileNumText);
 
-            userObject.setMobileNum(Integer.parseInt(mobileNumText));
-            mapper.save(userObject);
-        }*/
+            userObject.setMobileNum(mobileNumText);
+            new db().execute();
+        }
 
     }
 
@@ -143,6 +142,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_log_out) {
             Toast.makeText(MainActivity.this, "log out", Toast.LENGTH_SHORT).show();
             prefManager.clearSession();
+            Intent intent = new Intent(this, AddMobileActivity.class);
+            startActivity(intent);
+            finish();
 
         } else if (id == R.id.nav_share) {
             Toast.makeText(MainActivity.this, "share", Toast.LENGTH_SHORT).show();
@@ -208,12 +210,14 @@ public class MainActivity extends AppCompatActivity
 
             DynamoDBMapper mapper = new DynamoDBMapper(ddbClient);
 
-            userObject.setMobileNum(mobileNumText);
-
-            if(mapper != null)
+            if(mapper != null) {
                 mapper.save(userObject);
+            }
+
             else
                 Log.v(TAG,"not saved");
+
+
 
             return "Executed";
         }

@@ -35,6 +35,7 @@ dependencies {
     compile 'com.amazonaws:aws-android-sdk-s3:2.+'
     compile 'com.amazonaws:aws-android-sdk-ddb:2.+'
     compile 'com.amazonaws:aws-android-sdk-ddb-mapper:2.2.+'
+    compile 'com.rabbitmq:amqp-client:3.6.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
