@@ -33,8 +33,7 @@
                     android:id="@+id/chat_content"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="Chat Content" />
+                    android:textAppearance="?android:attr/textAppearanceLarge" />
 
             </ScrollView>
 
@@ -46,7 +45,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:padding="16dp">
+            android:paddingTop="4dp"
+            android:paddingBottom="12dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp">
 
             <EditText
                 android:id="@+id/et_send"
