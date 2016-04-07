@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +20,9 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.BlockingDeque;
@@ -35,6 +39,7 @@ public class ChatOneToOne extends AppCompatActivity {
     TextView chatContent;
     EditText etSend;
     Button btnSend;
+    ScrollView scChat;
 
     Thread subscribeThread;
     Thread publishThread;
@@ -49,6 +54,7 @@ public class ChatOneToOne extends AppCompatActivity {
         userNumber = bundle.getString("USER_NUMBER");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
+        assert toolbar != null;
         toolbar.setTitle(userNumber);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -59,6 +65,7 @@ public class ChatOneToOne extends AppCompatActivity {
         chatContent = (TextView) findViewById(R.id.chat_content);
         etSend = (EditText) findViewById(R.id.et_send);
         btnSend = (Button) findViewById(R.id.btn_send);
+        scChat = (ScrollView) findViewById(R.id.sv_chat);
 
         setUpConnectionFactory();
         publishToAMQP();
@@ -71,6 +78,7 @@ public class ChatOneToOne extends AppCompatActivity {
                 Date now = new Date();
                 SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
                 chatContent.append(ft.format(now) + ' ' + message + '\n');
+                scChat.fullScroll(View.FOCUS_DOWN);
             }
         };
         subscribe(incomingMessageHandler);
@@ -86,9 +94,15 @@ public class ChatOneToOne extends AppCompatActivity {
     ConnectionFactory factory = new ConnectionFactory();
     public void setUpConnectionFactory() {
         factory.setAutomaticRecoveryEnabled(false);
-        factory.setHost("192.168.50.26");
-        factory.setUsername("deepak");
-        factory.setPassword("deep");
+        try {
+            factory.setUri("amqp://pmkrlkkw:GB1jKxGoJX8ya_vywroGbvsdP3SQqFhI@fox.rmq.cloudamqp.com/pmkrlkkw");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
     }
 
     public void publishToAMQP()
