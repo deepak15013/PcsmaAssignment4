@@ -44,4 +44,8 @@ public class PrefManager {
         return pref.getBoolean(KEY_IS_LOGGED_IN,false);
     }
 
+    public String getMobileNumber() {
+        return pref.getString(KEY_MOBILE,"0000000000");
+    }
+
 }

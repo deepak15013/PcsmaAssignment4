@@ -21,8 +21,6 @@ import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBScanExpression;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedScanList;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
@@ -32,7 +30,6 @@ import java.util.List;
 import deepaksood.in.pcsmaassignment4.tabfragments.ChatsFragment;
 import deepaksood.in.pcsmaassignment4.tabfragments.ContactsFragment;
 import deepaksood.in.pcsmaassignment4.tabfragments.TimelineFragment;
-import deepaksood.in.pcsmaassignment4.tabfragments.UserObject;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -47,16 +44,10 @@ public class MainActivity extends AppCompatActivity
 
     private String mobileNumText="";
 
-    UserObject userObject;
-
-    CognitoCachingCredentialsProvider credentialsProvider;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        userObject = new UserObject();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -77,18 +68,12 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         prefManager = new PrefManager(getApplicationContext());
+        mobileNumText = prefManager.getMobileNumber();
 
+    }
 
-
-        Bundle bundle = getIntent().getExtras();
-        if(bundle != null) {
-            mobileNumText = bundle.getString("MOBILE_NUM");
-            Log.v(TAG,"mobile Num TExt: "+mobileNumText);
-
-            userObject.setMobileNum(mobileNumText);
-            new db().execute();
-        }
-
+    public String getMobileNumText() {
+        return mobileNumText;
     }
 
     @Override
@@ -193,33 +178,6 @@ public class MainActivity extends AppCompatActivity
         @Override
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
-        }
-    }
-
-    private class db extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... params) {
-
-            credentialsProvider = new CognitoCachingCredentialsProvider(
-                    getApplicationContext(),
-                    "us-east-1:9420ebde-0680-48b5-a18f-886d70725554", // Identity Pool ID
-                    Regions.US_EAST_1 // Region
-            );
-
-            AmazonDynamoDBClient ddbClient = new AmazonDynamoDBClient(credentialsProvider);
-
-            DynamoDBMapper mapper = new DynamoDBMapper(ddbClient);
-
-            if(mapper != null) {
-                mapper.save(userObject);
-            }
-
-            else
-                Log.v(TAG,"not saved");
-
-
-
-            return "Executed";
         }
     }
 

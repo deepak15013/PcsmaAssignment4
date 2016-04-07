@@ -106,8 +106,6 @@ public class AddMobileActivity extends AppCompatActivity implements View.OnClick
                     generateURL();
                     //sendOTP();
                     viewPager.setCurrentItem(1);
-                    pref.createLogin(mobileNumText);
-                    Log.v(TAG,"Logged in: "+pref.isLoggedIn());
 
                 }
                 else {

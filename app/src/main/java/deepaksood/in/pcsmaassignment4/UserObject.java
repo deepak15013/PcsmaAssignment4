@@ -1,4 +1,4 @@
-package deepaksood.in.pcsmaassignment4.tabfragments;
+package deepaksood.in.pcsmaassignment4;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;

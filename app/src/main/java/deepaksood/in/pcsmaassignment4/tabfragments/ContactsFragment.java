@@ -1,18 +1,14 @@
 package deepaksood.in.pcsmaassignment4.tabfragments;
 
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -27,8 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import deepaksood.in.pcsmaassignment4.ChatPackage.ChatOneToOne;
-import deepaksood.in.pcsmaassignment4.MainActivity;
 import deepaksood.in.pcsmaassignment4.R;
+import deepaksood.in.pcsmaassignment4.UserObject;
 
 public class ContactsFragment extends Fragment {
 

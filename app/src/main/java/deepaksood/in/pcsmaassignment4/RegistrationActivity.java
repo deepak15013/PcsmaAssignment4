@@ -1,6 +1,7 @@
 package deepaksood.in.pcsmaassignment4;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +11,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -36,12 +41,16 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
 
     private static String mobileNumText;
 
+    UserObject userObject;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
         ButterKnife.bind(this);
+
+        userObject = new UserObject();
 
         register.setOnClickListener(RegistrationActivity.this);
 
@@ -76,6 +85,10 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
             case R.id.btn_register:
                 checkName();
                 checkEmail();
+
+                saveDataToAmazon();
+                saveDataToSharedPreference();
+
                 Intent intent = new Intent(this, MainActivity.class);
                 intent.putExtra("MOBILE_NUM",mobileNumText);
                 startActivity(intent);
@@ -130,4 +143,46 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.v(TAG,"ConnectionFAiled");
     }
+
+    private PrefManager pref;
+    public void saveDataToSharedPreference() {
+        pref = new PrefManager(getApplicationContext());
+        Log.v(TAG,"prefRegistrationActivity: "+pref.isLoggedIn());
+        pref.createLogin(mobileNumText);
+        Log.v(TAG,"MoblieNum: "+pref.getMobileNumber());
+    }
+
+    public void saveDataToAmazon() {
+        userObject.setMobileNum(mobileNumText);
+        new db().execute();
+    }
+
+    private class db extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... params) {
+
+            CognitoCachingCredentialsProvider credentialsProvider;
+
+            credentialsProvider = new CognitoCachingCredentialsProvider(
+                    getApplicationContext(),
+                    "us-east-1:9420ebde-0680-48b5-a18f-886d70725554", // Identity Pool ID
+                    Regions.US_EAST_1 // Region
+            );
+
+            AmazonDynamoDBClient ddbClient = new AmazonDynamoDBClient(credentialsProvider);
+
+            DynamoDBMapper mapper = new DynamoDBMapper(ddbClient);
+
+            if(mapper != null) {
+                mapper.save(userObject);
+                Log.v(TAG,"UserObject SAved: "+userObject.getMobileNum());
+            }
+
+            else
+                Log.v(TAG,"not saved");
+
+            return "Executed";
+        }
+    }
+
 }

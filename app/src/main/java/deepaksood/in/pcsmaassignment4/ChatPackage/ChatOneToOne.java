@@ -20,6 +20,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeoutException;
 
 import deepaksood.in.pcsmaassignment4.R;
 
@@ -81,12 +83,21 @@ public class ChatOneToOne extends AppCompatActivity {
                 scChat.fullScroll(View.FOCUS_DOWN);
             }
         };
-        subscribe(incomingMessageHandler);
+        //subscribe(incomingMessageHandler);
 
     }
 
     @Override
     public boolean onSupportNavigateUp() {
+        try {
+            pubChannel.close();
+            pubConnection.close();
+            Log.v(TAG,"ConnectionClosed ChatsOneToOne");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
         onBackPressed();
         return super.onSupportNavigateUp();
     }
@@ -105,6 +116,8 @@ public class ChatOneToOne extends AppCompatActivity {
         }
     }
 
+    Connection pubConnection;
+    Channel pubChannel;
     public void publishToAMQP()
     {
         publishThread = new Thread(new Runnable() {
@@ -112,16 +125,22 @@ public class ChatOneToOne extends AppCompatActivity {
             public void run() {
                 while(true) {
                     try {
-                        Connection connection = factory.newConnection();
-                        Channel ch = connection.createChannel();
-                        ch.confirmSelect();
+                        Log.v(TAG,"ConnectionCreated ChatOOneToOne");
+                        if(pubConnection == null) {
+                            pubConnection = factory.newConnection();
+                        }
+                        pubChannel = pubConnection.createChannel();
+                        pubChannel.confirmSelect();
 
                         while (true) {
                             String message = queue.takeFirst().toString();
+                            Log.v(TAG,"Message: "+message);
                             try{
-                                ch.basicPublish("amq.fanout", "chat", null, message.getBytes());
+                                Log.v(TAG,"publish UserNumber: "+userNumber);
+                                pubChannel.queueDeclare(userNumber, true, true, false, null);
+                                pubChannel.basicPublish("amq.fanout", userNumber, null, message.getBytes());
                                 Log.d("", "[s] " + message);
-                                ch.waitForConfirmsOrDie();
+                                pubChannel.waitForConfirmsOrDie();
                             } catch (Exception e){
                                 Log.d("","[f] " + message);
                                 queue.putFirst(message);
@@ -166,6 +185,8 @@ public class ChatOneToOne extends AppCompatActivity {
         }
     }
 
+    Channel subChannel;
+    Connection subConnection;
     void subscribe(final Handler handler)
     {
         subscribeThread = new Thread(new Runnable() {
@@ -173,13 +194,13 @@ public class ChatOneToOne extends AppCompatActivity {
             public void run() {
                 while(true) {
                     try {
-                        Connection connection = factory.newConnection();
-                        Channel channel = connection.createChannel();
-                        channel.basicQos(1);
-                        AMQP.Queue.DeclareOk q = channel.queueDeclare();
-                        channel.queueBind(q.getQueue(), "amq.fanout", "chat");
-                        QueueingConsumer consumer = new QueueingConsumer(channel);
-                        channel.basicConsume(q.getQueue(), true, consumer);
+                        subConnection = factory.newConnection();
+                        subChannel = subConnection.createChannel();
+                        subChannel.basicQos(1);
+                        AMQP.Queue.DeclareOk q = subChannel.queueDeclare();
+                        subChannel.queueBind(q.getQueue(), "amq.fanout", "chat");
+                        QueueingConsumer consumer = new QueueingConsumer(subChannel);
+                        subChannel.basicConsume(q.getQueue(), true, consumer);
 
                         while (true) {
                             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
