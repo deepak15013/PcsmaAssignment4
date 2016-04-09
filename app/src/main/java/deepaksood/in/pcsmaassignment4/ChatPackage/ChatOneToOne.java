@@ -30,6 +30,7 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeoutException;
 
+import deepaksood.in.pcsmaassignment4.MainActivity;
 import deepaksood.in.pcsmaassignment4.R;
 
 public class ChatOneToOne extends AppCompatActivity {
@@ -46,6 +47,7 @@ public class ChatOneToOne extends AppCompatActivity {
     Thread subscribeThread;
     Thread publishThread;
     private BlockingDeque queue = new LinkedBlockingDeque();
+    private String profileNumber = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,8 @@ public class ChatOneToOne extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         userNumber = bundle.getString("USER_NUMBER");
+        profileNumber = bundle.getString("PROFILE_NUMBER");
+        Log.v(TAG,"profileNumber: "+profileNumber);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
         assert toolbar != null;
@@ -69,6 +73,8 @@ public class ChatOneToOne extends AppCompatActivity {
         btnSend = (Button) findViewById(R.id.btn_send);
         scChat = (ScrollView) findViewById(R.id.sv_chat);
 
+
+
         setUpConnectionFactory();
         publishToAMQP();
         setUpPubButton();
@@ -83,28 +89,60 @@ public class ChatOneToOne extends AppCompatActivity {
                 scChat.fullScroll(View.FOCUS_DOWN);
             }
         };
-        //subscribe(incomingMessageHandler);
+        subscribe(incomingMessageHandler);
 
     }
 
     @Override
     public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
+    }
+
+    @Override
+    public void onBackPressed() {
         try {
-            pubChannel.close();
-            pubConnection.close();
+            if(publishThread.isAlive()) {
+                Log.v(TAG,"thread running");
+            }
+            if(pubChannel != null) {
+                pubChannel.close();
+            }
+            if(pubConnection != null) {
+                pubConnection.close();
+            }
+            publishThread.interrupt();
+            if(!publishThread.isAlive()) {
+                Log.v(TAG,"thread stopped");
+            }
+            else {
+                Log.v(TAG,"not stopped");
+            }
             Log.v(TAG,"ConnectionClosed ChatsOneToOne");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (TimeoutException e) {
             e.printStackTrace();
         }
-        onBackPressed();
-        return super.onSupportNavigateUp();
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.v(TAG,"OnPause chat one to one");
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.v(TAG,"OnDestroy chat one to one");
+        super.onDestroy();
     }
 
     ConnectionFactory factory = new ConnectionFactory();
     public void setUpConnectionFactory() {
         factory.setAutomaticRecoveryEnabled(false);
+
         try {
             factory.setUri("amqp://pmkrlkkw:GB1jKxGoJX8ya_vywroGbvsdP3SQqFhI@fox.rmq.cloudamqp.com/pmkrlkkw");
         } catch (URISyntaxException e) {
@@ -114,6 +152,7 @@ public class ChatOneToOne extends AppCompatActivity {
         } catch (KeyManagementException e) {
             e.printStackTrace();
         }
+
     }
 
     Connection pubConnection;
@@ -126,20 +165,20 @@ public class ChatOneToOne extends AppCompatActivity {
                 while(true) {
                     try {
                         Log.v(TAG,"ConnectionCreated ChatOOneToOne");
-                        if(pubConnection == null) {
+                        if(pubConnection == null)
                             pubConnection = factory.newConnection();
-                        }
                         pubChannel = pubConnection.createChannel();
                         pubChannel.confirmSelect();
 
                         while (true) {
-                            String message = queue.takeFirst().toString();
+                            String message = "from:"+profileNumber +" "+ queue.takeFirst().toString()+" " + "to:"+userNumber;
                             Log.v(TAG,"Message: "+message);
                             try{
                                 Log.v(TAG,"publish UserNumber: "+userNumber);
-                                pubChannel.queueDeclare(userNumber, true, true, false, null);
-                                pubChannel.basicPublish("amq.fanout", userNumber, null, message.getBytes());
-                                Log.d("", "[s] " + message);
+                                //pubChannel.queueDeclare(userNumber, true, true, false, null);
+//                                pubChannel.basicPublish("amq.fanout", userNumber, null, message.getBytes()); //for all queues
+//                                Log.d("", "[s] " + message);
+                                pubChannel.basicPublish("", userNumber, null, message.getBytes());
                                 pubChannel.waitForConfirmsOrDie();
                             } catch (Exception e){
                                 Log.d("","[f] " + message);
@@ -169,6 +208,8 @@ public class ChatOneToOne extends AppCompatActivity {
             @Override
             public void onClick(View arg0) {
                 if(etSend.getText() != null) {
+                    chatContent.append(profileNumber+": "+etSend.getText().toString()+"\n");
+                    scChat.fullScroll(View.FOCUS_DOWN);
                     publishMessage(etSend.getText().toString());
                     etSend.setText("");
                 }
@@ -194,10 +235,12 @@ public class ChatOneToOne extends AppCompatActivity {
             public void run() {
                 while(true) {
                     try {
-                        subConnection = factory.newConnection();
+                        if(subConnection == null)
+                            subConnection = factory.newConnection();
                         subChannel = subConnection.createChannel();
                         subChannel.basicQos(1);
-                        AMQP.Queue.DeclareOk q = subChannel.queueDeclare();
+                        Log.v(TAG,"userNumber inside subsribe: "+profileNumber);
+                        AMQP.Queue.DeclareOk q = subChannel.queueDeclare(profileNumber,true,true,false,null);
                         subChannel.queueBind(q.getQueue(), "amq.fanout", "chat");
                         QueueingConsumer consumer = new QueueingConsumer(subChannel);
                         subChannel.basicConsume(q.getQueue(), true, consumer);

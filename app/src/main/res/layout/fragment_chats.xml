@@ -4,8 +4,17 @@
     android:layout_height="match_parent"
     tools:context="deepaksood.in.pcsmaassignment4.tabfragments.ChatsFragment">
 
+    <TextView
+        android:id="@+id/user_number_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="user_number_chat"/>
+
     <ScrollView
         android:id="@+id/sv_chat_fragment"
+        android:paddingTop="16dp"
+        android:layout_below="@+id/user_number_chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

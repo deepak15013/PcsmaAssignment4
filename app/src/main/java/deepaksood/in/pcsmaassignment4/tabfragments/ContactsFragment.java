@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import deepaksood.in.pcsmaassignment4.ChatPackage.ChatOneToOne;
+import deepaksood.in.pcsmaassignment4.MainActivity;
 import deepaksood.in.pcsmaassignment4.R;
 import deepaksood.in.pcsmaassignment4.UserObject;
 
@@ -40,6 +41,8 @@ public class ContactsFragment extends Fragment {
 
     List<String> contactsList;
 
+    private String profileNumber = "";
+
     public ContactsFragment() {
         // Required empty public constructor
     }
@@ -49,6 +52,9 @@ public class ContactsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         contactsList = new ArrayList<>();
+
+        MainActivity mainActivity = (MainActivity) getActivity();
+        profileNumber = mainActivity.getMobileNumText();
 
 //        adapter = new ContactsListAdapter(getActivity(), web , mobileArray);
 
@@ -72,6 +78,7 @@ public class ContactsFragment extends Fragment {
                 Toast.makeText(getActivity(), "pos: "+contactsList.get(position), Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(),ChatOneToOne.class);
                 intent.putExtra("USER_NUMBER",contactsList.get(position));
+                intent.putExtra("PROFILE_NUMBER",profileNumber);
                 startActivity(intent);
             }
         });

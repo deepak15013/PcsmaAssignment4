@@ -47,6 +47,7 @@ public class ChatsFragment extends Fragment {
 
     TextView chatFragmentContent;
     ScrollView chatFragment;
+    TextView userNumberChat;
 
 
     public ChatsFragment() {
@@ -62,6 +63,8 @@ public class ChatsFragment extends Fragment {
         MainActivity mainActivity = (MainActivity) getActivity();
         USER_QUEUE = mainActivity.getMobileNumText();
         Log.v(TAG,"USER_QUEUE: "+USER_QUEUE);
+
+
 
         setUpConnectionFactory();
 
@@ -104,8 +107,14 @@ public class ChatsFragment extends Fragment {
 
         chatFragmentContent = (TextView) view.findViewById(R.id.chat_fragment_content);
         chatFragment = (ScrollView) view.findViewById(R.id.sv_chat_fragment);
-
+        userNumberChat = (TextView) view.findViewById(R.id.user_number_chat);
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        userNumberChat.setText(USER_QUEUE);
+        super.onActivityCreated(savedInstanceState);
     }
 
     ConnectionFactory connectionFactory = new ConnectionFactory();
@@ -138,6 +147,7 @@ public class ChatsFragment extends Fragment {
                         }
                         subChannel = subConnection.createChannel();
                         subChannel.basicQos(1);
+                        Log.v(TAG,"USER_QUEUE: "+USER_QUEUE);
                         AMQP.Queue.DeclareOk q = subChannel.queueDeclare(USER_QUEUE,true,true,false,null);
                         subChannel.queueBind(q.getQueue(), "amq.fanout", "chat");
                         QueueingConsumer consumer = new QueueingConsumer(subChannel);
