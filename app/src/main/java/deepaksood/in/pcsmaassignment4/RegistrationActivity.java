@@ -20,8 +20,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.model.people.Person;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -41,6 +45,11 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
 
     private static String mobileNumText;
 
+    private String displayName="";
+    private String displayEmailId="";
+    private String photoUrl="https://drive.google.com/uc?id=1SI4M20f-etI-8wv1uwgFmFNiI-TFHZlshg";
+    private String coverUrl="https://drive.google.com/uc?id=0B1jHFoEHN0zfek43ajZrMDZSSms";
+
     UserObject userObject;
 
     @Override
@@ -55,12 +64,17 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         register.setOnClickListener(RegistrationActivity.this);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestScopes(new Scope(Scopes.PROFILE))
+                .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+                .requestProfile()
                 .requestEmail()
                 .build();
-
+        // Build a GoogleApiClient with access to the Google Sign-In API and the
+        // options specified by gso.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .addApi(Plus.API)
                 .build();
 
         SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
@@ -85,14 +99,8 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
             case R.id.btn_register:
                 checkName();
                 checkEmail();
+                startActivity();
 
-                saveDataToAmazon();
-                saveDataToSharedPreference();
-
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.putExtra("MOBILE_NUM",mobileNumText);
-                startActivity(intent);
-                finish();
                 break;
 
             case R.id.sign_in_button:
@@ -100,6 +108,15 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
                 break;
 
         }
+    }
+
+    public void startActivity() {
+        saveDataToAmazon();
+        saveDataToSharedPreference();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void signIn() {
@@ -122,8 +139,35 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
+
+            displayName = acct.getDisplayName();
+            displayEmailId = acct.getEmail();
+            try {
+                if(acct.getPhotoUrl() != null) {
+                    photoUrl = acct.getPhotoUrl().toString();
+                }
+            } catch (Exception e) {
+                Log.v(TAG,"exception e from: "+e);
+            }
+
+
+            if(Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
+                Person person = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+
+                Person.Cover.CoverPhoto coverPhoto = null;
+                if(person.getCover() != null) {
+                    coverPhoto = person.getCover().getCoverPhoto();
+                    coverUrl = coverPhoto.getUrl().toString();
+                }
+                else {
+                    coverUrl = "https://drive.google.com/uc?id=0B1jHFoEHN0zfek43ajZrMDZSSms";
+                }
+
+            }
+
             assert acct != null;
             mStatusTextView.setText(acct.getDisplayName());
+            startActivity();
 
         } else {
             // Signed out, show unauthenticated UI.
@@ -149,11 +193,16 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         pref = new PrefManager(getApplicationContext());
         Log.v(TAG,"prefRegistrationActivity: "+pref.isLoggedIn());
         pref.createLogin(mobileNumText);
+        pref.saveUserData(displayName, displayEmailId, photoUrl, coverUrl);
         Log.v(TAG,"MoblieNum: "+pref.getMobileNumber());
     }
 
     public void saveDataToAmazon() {
         userObject.setMobileNum(mobileNumText);
+        userObject.setDisplayName(displayName);
+        userObject.setDisplayEmailId(displayEmailId);
+        userObject.setPhotoUrl(photoUrl);
+        userObject.setCoverUrl(coverUrl);
         new db().execute();
     }
 
@@ -176,6 +225,10 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
             if(mapper != null) {
                 mapper.save(userObject);
                 Log.v(TAG,"UserObject SAved: "+userObject.getMobileNum());
+                Log.v(TAG,"name: "+userObject.getDisplayName());
+                Log.v(TAG,"email: "+userObject.getDisplayEmailId());
+                Log.v(TAG,"photo: "+userObject.getPhotoUrl());
+                Log.v(TAG,"cover: "+userObject.getCoverUrl());
             }
 
             else

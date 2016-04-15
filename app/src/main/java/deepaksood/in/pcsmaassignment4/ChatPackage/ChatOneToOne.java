@@ -143,7 +143,7 @@ public class ChatOneToOne extends AppCompatActivity {
     public void setUpConnectionFactory() {
         factory.setAutomaticRecoveryEnabled(false);
 
-        try {
+        /*try {
             factory.setUri("amqp://pmkrlkkw:GB1jKxGoJX8ya_vywroGbvsdP3SQqFhI@fox.rmq.cloudamqp.com/pmkrlkkw");
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -151,7 +151,10 @@ public class ChatOneToOne extends AppCompatActivity {
             e.printStackTrace();
         } catch (KeyManagementException e) {
             e.printStackTrace();
-        }
+        }*/
+        factory.setHost("52.207.235.200");
+        factory.setUsername("deepak");
+        factory.setPassword("deepak");
 
     }
 

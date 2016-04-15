@@ -3,6 +3,7 @@ package deepaksood.in.pcsmaassignment4;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -17,12 +18,22 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +43,7 @@ import deepaksood.in.pcsmaassignment4.tabfragments.ContactsFragment;
 import deepaksood.in.pcsmaassignment4.tabfragments.TimelineFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -43,6 +54,18 @@ public class MainActivity extends AppCompatActivity
     private ViewPager viewPager;
 
     private String mobileNumText="";
+    private String displayName = "";
+    private String displayEmailId = "";
+    private String photoUrl = "";
+    private String coverUrl = "";
+
+    TextView viewDisplayName;
+    TextView viewEmailId;
+    TextView mobileNum;
+    ImageView displayPic;
+    ImageView coverPic;
+
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +87,47 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        getDataFromPrefManager();
+        setDataToNavigationDrawer();
 
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+    }
+
+    public void getDataFromPrefManager() {
         prefManager = new PrefManager(getApplicationContext());
         mobileNumText = prefManager.getMobileNumber();
+        displayName = prefManager.getDisplayName();
+        displayEmailId = prefManager.getDisplayEmailId();
+        photoUrl = prefManager.getPhotoUrl();
+        coverUrl = prefManager.getCoverUrl();
+    }
 
+    public void setDataToNavigationDrawer() {
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        View header=navigationView.getHeaderView(0);
+        viewDisplayName = (TextView) header.findViewById(R.id.displayName);
+        viewEmailId = (TextView) header.findViewById(R.id.displayEmailId);
+        mobileNum = (TextView) header.findViewById(R.id.tv_mobile_num);
+        displayPic = (ImageView) header.findViewById(R.id.displayPic);
+        coverPic = (ImageView) header.findViewById(R.id.coverPic);
+
+        viewDisplayName.setText(displayName);
+        viewEmailId.setText(displayEmailId);
+        mobileNum.setText(mobileNumText);
+
+        if(!photoUrl.contentEquals(""))
+            Picasso.with(this).load(photoUrl).into(displayPic);
+        if(coverUrl != null)
+            Picasso.with(this).load(coverUrl).fit().centerCrop().into(coverPic);
     }
 
     public String getMobileNumText() {
@@ -127,6 +185,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_log_out) {
             Toast.makeText(MainActivity.this, "log out", Toast.LENGTH_SHORT).show();
             prefManager.clearSession();
+            googleSignOut();
             Intent intent = new Intent(this, AddMobileActivity.class);
             startActivity(intent);
             finish();
@@ -144,12 +203,27 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void googleSignOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        Log.v(TAG,"Log out success: "+status);
+                    }
+                });
+    }
+
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new TimelineFragment(), "TIMELINE");
         adapter.addFragment(new ChatsFragment(), "CHATS");
         adapter.addFragment(new ContactsFragment(), "CONTACTS");
         viewPager.setAdapter(adapter);
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.v(TAG,"Cannot logout");
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
