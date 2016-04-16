@@ -31,8 +31,6 @@ public class ContactsFragment extends Fragment {
 
     private static final String TAG = ContactsFragment.class.getSimpleName();
 
-    String[] mobileArray = {"Android","IPhone","WindowsMobile","Blackberry","WebOS","Ubuntu","Windows7","Max OS X"};
-
     ListView list;
     ContactsListAdapter adapter;
 
@@ -40,6 +38,8 @@ public class ContactsFragment extends Fragment {
     PaginatedScanList<UserObject> result;
 
     List<String> contactsList;
+    List<String> contactsName;
+    List<String> contactsPhotos;
 
     private String profileNumber = "";
 
@@ -52,6 +52,8 @@ public class ContactsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         contactsList = new ArrayList<>();
+        contactsName = new ArrayList<>();
+        contactsPhotos = new ArrayList<>();
 
         MainActivity mainActivity = (MainActivity) getActivity();
         profileNumber = mainActivity.getMobileNumText();
@@ -108,6 +110,8 @@ public class ContactsFragment extends Fragment {
                 for(UserObject i: result) {
                     Log.v(TAG,"Mobile Num Retrived: "+i.getMobileNum());
                     contactsList.add(i.getMobileNum());
+                    contactsName.add(i.getDisplayName());
+                    contactsPhotos.add(i.getPhotoUrl());
                 }
             }
 
@@ -123,10 +127,16 @@ public class ContactsFragment extends Fragment {
                 adapter.add(i);
             }*/
             Log.v(TAG,"onPostExecute");
-            String[] contactsArray = new String[contactsList.size()];
-            contactsArray = contactsList.toArray(contactsArray);
+            String[] contactsArrayNumber = new String[contactsList.size()];
+            contactsArrayNumber = contactsList.toArray(contactsArrayNumber);
 
-            adapter = new ContactsListAdapter(getActivity(), contactsArray , mobileArray);
+            String[] contactsArrayName = new String[contactsName.size()];
+            contactsArrayName = contactsName.toArray(contactsArrayName);
+
+            String[] contactsArrayPhoto = new String[contactsPhotos.size()];
+            contactsArrayPhoto = contactsPhotos.toArray(contactsArrayPhoto);
+
+            adapter = new ContactsListAdapter(getActivity(), contactsArrayName , contactsArrayNumber, contactsArrayPhoto);
             list.setAdapter(adapter);
             super.onPostExecute(s);
 

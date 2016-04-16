@@ -9,6 +9,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -158,8 +159,19 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if(id == R.id.action_refresh) {
+            Fragment contact = adapter.getItem(2);
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.detach(contact);
+            ft.attach(contact);
+            ft.commit();
+            Toast.makeText(MainActivity.this, "Refresh", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Toast.makeText(MainActivity.this, "Coming Soon", Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -213,12 +225,14 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
+    ViewPagerAdapter adapter;
     private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new TimelineFragment(), "TIMELINE");
         adapter.addFragment(new ChatsFragment(), "CHATS");
         adapter.addFragment(new ContactsFragment(), "CONTACTS");
         viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(1);
     }
 
     @Override
