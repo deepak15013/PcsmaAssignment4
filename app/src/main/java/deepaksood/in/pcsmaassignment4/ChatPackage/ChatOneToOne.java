@@ -1,5 +1,6 @@
 package deepaksood.in.pcsmaassignment4.ChatPackage;
 
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +21,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -49,21 +52,34 @@ public class ChatOneToOne extends AppCompatActivity {
     private BlockingDeque queue = new LinkedBlockingDeque();
     private String profileNumber = "";
 
+    ImageView toolbarContactPic;
+    TextView toolbarDisplayName;
+    TextView toolbarPhoneNumber;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_one_to_one);
 
         Bundle bundle = getIntent().getExtras();
-        userNumber = bundle.getString("USER_NUMBER");
+//        userNumber = bundle.getString("USER_NUMBER");
         profileNumber = bundle.getString("PROFILE_NUMBER");
+        ChatUserObject chatUserObject = (ChatUserObject) getIntent().getSerializableExtra("CHAT_USER_OBJECT");
         Log.v(TAG,"profileNumber: "+profileNumber);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
-        assert toolbar != null;
-        toolbar.setTitle(userNumber);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        toolbarContactPic = (ImageView) findViewById(R.id.iv_toolbar_contact_pic);
+        toolbarDisplayName = (TextView) findViewById(R.id.tv_toolbar_display_name);
+        toolbarPhoneNumber = (TextView) findViewById(R.id.tv_toolbar_number);
+
+        toolbarDisplayName.setText(chatUserObject.getChatUserDisplayName());
+        toolbarPhoneNumber.setText(chatUserObject.getChatuserMobileNum());
+        Picasso.with(getApplicationContext()).load(chatUserObject.getChatUserPhotoUrl()).into(toolbarContactPic);
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE|
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -106,10 +122,12 @@ public class ChatOneToOne extends AppCompatActivity {
                 Log.v(TAG,"thread running");
             }
             if(pubChannel != null) {
-                pubChannel.close();
+                if(pubChannel.isOpen())
+                    pubChannel.close();
             }
             if(pubConnection != null) {
-                pubConnection.close();
+                if(pubConnection.isOpen())
+                    pubConnection.close();
             }
             publishThread.interrupt();
             if(!publishThread.isAlive()) {

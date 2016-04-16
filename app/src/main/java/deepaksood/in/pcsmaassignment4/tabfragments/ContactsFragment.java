@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import deepaksood.in.pcsmaassignment4.ChatPackage.ChatOneToOne;
+import deepaksood.in.pcsmaassignment4.ChatPackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.MainActivity;
 import deepaksood.in.pcsmaassignment4.R;
 import deepaksood.in.pcsmaassignment4.UserObject;
@@ -37,9 +38,11 @@ public class ContactsFragment extends Fragment {
     CognitoCachingCredentialsProvider credentialsProvider;
     PaginatedScanList<UserObject> result;
 
-    List<String> contactsList;
+//    List<String> contactsList;
     List<String> contactsName;
-    List<String> contactsPhotos;
+//    List<String> contactsPhotos;
+
+    List<ChatUserObject> chatUserObjects;
 
     private String profileNumber = "";
 
@@ -51,9 +54,10 @@ public class ContactsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        contactsList = new ArrayList<>();
+//        contactsList = new ArrayList<>();
         contactsName = new ArrayList<>();
-        contactsPhotos = new ArrayList<>();
+//        contactsPhotos = new ArrayList<>();
+        chatUserObjects = new ArrayList<>();
 
         MainActivity mainActivity = (MainActivity) getActivity();
         profileNumber = mainActivity.getMobileNumText();
@@ -77,9 +81,11 @@ public class ContactsFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                Toast.makeText(getActivity(), "pos: "+contactsList.get(position), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "pos: "+contactsList.get(position), Toast.LENGTH_SHORT).show();
+
                 Intent intent = new Intent(getActivity(),ChatOneToOne.class);
-                intent.putExtra("USER_NUMBER",contactsList.get(position));
+                intent.putExtra("CHAT_USER_OBJECT",chatUserObjects.get(position));
+//                intent.putExtra("USER_NUMBER",contactsList.get(position));
                 intent.putExtra("PROFILE_NUMBER",profileNumber);
                 startActivity(intent);
             }
@@ -108,10 +114,12 @@ public class ContactsFragment extends Fragment {
                 DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
                 result = mapper.scan(UserObject.class, scanExpression);
                 for(UserObject i: result) {
-                    Log.v(TAG,"Mobile Num Retrived: "+i.getMobileNum());
-                    contactsList.add(i.getMobileNum());
+                    ChatUserObject chatUserObject = new ChatUserObject(i.getMobileNum(), i.getDisplayName(), i.getPhotoUrl(), i.getDisplayEmailId(), i.getCoverUrl());
+                    chatUserObjects.add(chatUserObject);
+//                    Log.v(TAG,"Mobile Num Retrived: "+i.getMobileNum());
+//                    contactsList.add(i.getMobileNum());
                     contactsName.add(i.getDisplayName());
-                    contactsPhotos.add(i.getPhotoUrl());
+//                    contactsPhotos.add(i.getPhotoUrl());
                 }
             }
 
@@ -123,20 +131,17 @@ public class ContactsFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String s) {
-            /*for(String i : contactsList) {
-                adapter.add(i);
-            }*/
             Log.v(TAG,"onPostExecute");
-            String[] contactsArrayNumber = new String[contactsList.size()];
-            contactsArrayNumber = contactsList.toArray(contactsArrayNumber);
+//            String[] contactsArrayNumber = new String[contactsList.size()];
+//            contactsArrayNumber = contactsList.toArray(contactsArrayNumber);
 
             String[] contactsArrayName = new String[contactsName.size()];
             contactsArrayName = contactsName.toArray(contactsArrayName);
 
-            String[] contactsArrayPhoto = new String[contactsPhotos.size()];
-            contactsArrayPhoto = contactsPhotos.toArray(contactsArrayPhoto);
+//            String[] contactsArrayPhoto = new String[contactsPhotos.size()];
+//            contactsArrayPhoto = contactsPhotos.toArray(contactsArrayPhoto);
 
-            adapter = new ContactsListAdapter(getActivity(), contactsArrayName , contactsArrayNumber, contactsArrayPhoto);
+            adapter = new ContactsListAdapter(getActivity(), chatUserObjects, contactsArrayName);
             list.setAdapter(adapter);
             super.onPostExecute(s);
 

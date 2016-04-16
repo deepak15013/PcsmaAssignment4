@@ -10,8 +10,10 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import deepaksood.in.pcsmaassignment4.ChatPackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.R;
 
 /**
@@ -21,15 +23,15 @@ public class ContactsListAdapter extends ArrayAdapter<String> {
 
     private final Activity context;
     private final String[] name;
-    private final String[] number;
-    private final String[] photo;
+    //private final String[] number;
+    //private final String[] photo;
+    private final List<ChatUserObject> chatUserObjects;
 
-    public ContactsListAdapter(Activity context, String[] name, String[] number, String[] photo) {
+    public ContactsListAdapter(Activity context, List<ChatUserObject> chatUserObjects, String[] name) {
         super(context, R.layout.contacts_item, name);
+        this.name= name;
         this.context = context;
-        this.name = name;
-        this.number = number;
-        this.photo = photo;
+        this.chatUserObjects = chatUserObjects;
     }
 
     @Override
@@ -40,11 +42,11 @@ public class ContactsListAdapter extends ArrayAdapter<String> {
         TextView txtPhone = (TextView) rowView.findViewById(R.id.contacts_phone);
         ImageView imageViewPhoto = (ImageView) rowView.findViewById(R.id.iv_contact_pic);
 
-        txtTitle.setText(name[position]);
-        txtPhone.setText(number[position]);
+        txtTitle.setText(chatUserObjects.get(position).getChatUserDisplayName());
+        txtPhone.setText(chatUserObjects.get(position).getChatuserMobileNum());
 
-        if(photo[position] != null) {
-            Picasso.with(getContext()).load(photo[position]).into(imageViewPhoto);
+        if(chatUserObjects.get(position).getChatUserPhotoUrl() != null) {
+            Picasso.with(getContext()).load(chatUserObjects.get(position).getChatUserPhotoUrl()).into(imageViewPhoto);
         }
 
         return rowView;
