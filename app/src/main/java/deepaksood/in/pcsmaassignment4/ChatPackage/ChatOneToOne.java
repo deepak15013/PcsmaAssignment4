@@ -1,5 +1,6 @@
 package deepaksood.in.pcsmaassignment4.ChatPackage;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -12,6 +13,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,14 +29,18 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeoutException;
 
 import deepaksood.in.pcsmaassignment4.MainActivity;
 import deepaksood.in.pcsmaassignment4.R;
+import deepaksood.in.pcsmaassignment4.tabfragments.ContactsFragment;
 
 public class ChatOneToOne extends AppCompatActivity {
 
@@ -45,7 +51,7 @@ public class ChatOneToOne extends AppCompatActivity {
     TextView chatContent;
     EditText etSend;
     Button btnSend;
-    ScrollView scChat;
+//    ScrollView scChat;
 
     Thread subscribeThread;
     Thread publishThread;
@@ -56,6 +62,11 @@ public class ChatOneToOne extends AppCompatActivity {
     TextView toolbarDisplayName;
     TextView toolbarPhoneNumber;
 
+    private ChatAdapter adapter;
+    ListView messageContainer;
+
+    ChatUserObject chatUserObject;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,8 +75,13 @@ public class ChatOneToOne extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
 //        userNumber = bundle.getString("USER_NUMBER");
         profileNumber = bundle.getString("PROFILE_NUMBER");
-        ChatUserObject chatUserObject = (ChatUserObject) getIntent().getSerializableExtra("CHAT_USER_OBJECT");
+        chatUserObject = (ChatUserObject) getIntent().getSerializableExtra("CHAT_USER_OBJECT");
         Log.v(TAG,"profileNumber: "+profileNumber);
+        userNumber = chatUserObject.getChatuserMobileNum();
+
+        for(ChatMessage i : chatUserObject.getChatMessages()) {
+            Log.v(TAG,"Ichat Message: "+i.getMessage());
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
 
@@ -84,12 +100,14 @@ public class ChatOneToOne extends AppCompatActivity {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE|
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        chatContent = (TextView) findViewById(R.id.chat_content);
+//        chatContent = (TextView) findViewById(R.id.chat_content);
         etSend = (EditText) findViewById(R.id.et_send);
         btnSend = (Button) findViewById(R.id.btn_send);
-        scChat = (ScrollView) findViewById(R.id.sv_chat);
+//        scChat = (ScrollView) findViewById(R.id.sv_chat);
 
+        messageContainer = (ListView) findViewById(R.id.message_container);
 
+        loadDummyHistory();
 
         setUpConnectionFactory();
         publishToAMQP();
@@ -101,11 +119,37 @@ public class ChatOneToOne extends AppCompatActivity {
                 String message = msg.getData().getString("msg");
                 Date now = new Date();
                 SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
-                chatContent.append(ft.format(now) + ' ' + message + '\n');
-                scChat.fullScroll(View.FOCUS_DOWN);
+                Log.v(TAG,"messageReceived-----------: "+message);
+                //chatContent.append(ft.format(now) + ' ' + message + '\n');
+//                scChat.fullScroll(View.FOCUS_DOWN);
             }
         };
         subscribe(incomingMessageHandler);
+
+    }
+
+    private void loadDummyHistory(){
+
+        /*ChatMessage msg = new ChatMessage();
+        msg.setId(1);
+        msg.setMe(false);
+        msg.setMessage("Hi");
+        msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+        chatHistory.add(msg);
+        ChatMessage msg1 = new ChatMessage();
+        msg1.setId(2);
+        msg1.setMe(false);
+        msg1.setMessage("How r u doing???");
+        msg1.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+        chatHistory.add(msg1);*/
+
+        adapter = new ChatAdapter(ChatOneToOne.this, new ArrayList<ChatMessage>());
+        messageContainer.setAdapter(adapter);
+
+        for(int i=0; i<chatUserObject.getChatMessages().size(); i++) {
+            ChatMessage message = chatUserObject.getChatMessages().get(i);
+            displayMessage(message);
+        }
 
     }
 
@@ -137,11 +181,18 @@ public class ChatOneToOne extends AppCompatActivity {
                 Log.v(TAG,"not stopped");
             }
             Log.v(TAG,"ConnectionClosed ChatsOneToOne");
+
+
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (TimeoutException e) {
             e.printStackTrace();
         }
+        Intent intent = new Intent();
+        intent.putExtra("CHAT_USER_OBJECT_BACK",chatUserObject);
+        setResult(1, intent);
+        finish();
         super.onBackPressed();
     }
 
@@ -228,14 +279,41 @@ public class ChatOneToOne extends AppCompatActivity {
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                if(etSend.getText() != null) {
-                    chatContent.append(profileNumber+": "+etSend.getText().toString()+"\n");
-                    scChat.fullScroll(View.FOCUS_DOWN);
+                if(etSend.getText() != null && !etSend.getText().toString().equals("") && !etSend.getText().toString().equals(" ")) {
+                    printChat();
+//                    chatContent.append(profileNumber+": "+etSend.getText().toString()+"\n");
+//                    scChat.fullScroll(View.FOCUS_DOWN);
                     publishMessage(etSend.getText().toString());
                     etSend.setText("");
                 }
             }
         });
+    }
+
+    public void printChat() {
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setMessage(etSend.getText().toString());
+        chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+        chatMessage.setMe(true);
+
+        displayMessage(chatMessage);
+
+        chatUserObject.getChatMessages().add(chatMessage);
+
+        for(ChatMessage i : chatUserObject.getChatMessages()) {
+            Log.v(TAG,"chatMessage: "+i.getMessage());
+        }
+
+    }
+
+    public void displayMessage(ChatMessage message) {
+        adapter.add(message);
+        adapter.notifyDataSetChanged();
+        scroll();
+    }
+
+    private void scroll() {
+        messageContainer.setSelection(messageContainer.getCount() - 1);
     }
 
     void publishMessage(String message) {

@@ -22,6 +22,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import java.util.ArrayList;
 import java.util.List;
 
+import deepaksood.in.pcsmaassignment4.ChatPackage.ChatMessage;
 import deepaksood.in.pcsmaassignment4.ChatPackage.ChatOneToOne;
 import deepaksood.in.pcsmaassignment4.ChatPackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.MainActivity;
@@ -46,6 +47,8 @@ public class ContactsFragment extends Fragment {
 
     private String profileNumber = "";
 
+    private int lastObjectPosition;
+
     public ContactsFragment() {
         // Required empty public constructor
     }
@@ -67,6 +70,47 @@ public class ContactsFragment extends Fragment {
         new db().execute();
     }
 
+    @Override
+    public void onPause() {
+        Log.v(TAG,"onPause");
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        Log.v(TAG,"onResume");
+        for(ChatUserObject i: chatUserObjects) {
+            Log.v(TAG,"name: "+i.getChatUserDisplayName());
+            for(ChatMessage j: i.getChatMessages()) {
+                Log.v(TAG,"message: "+j.getMessage());
+            }
+        }
+        super.onResume();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == 1) {
+            Bundle bundle = data.getExtras();
+            if(bundle != null) {
+                ChatUserObject chatUserObject = (ChatUserObject) bundle.getSerializable("CHAT_USER_OBJECT_BACK");
+                if(chatUserObject != null) {
+                    Log.v(TAG,"chatUserObject: "+chatUserObject);
+                    Log.v(TAG,"onj: "+chatUserObject.getChatUserDisplayName());
+                    chatUserObjects.set(lastObjectPosition, chatUserObject);
+                }
+                else {
+                    Log.v(TAG,"nullChatUserObject");
+                }
+
+            }
+            //Log.v(TAG,"chatUserObject: "+chatUserObject.getChatMessages().get(0));
+        }
+        else{
+            Log.v(TAG,"onActivityResult cancelled");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,11 +127,12 @@ public class ContactsFragment extends Fragment {
 
 //                Toast.makeText(getActivity(), "pos: "+contactsList.get(position), Toast.LENGTH_SHORT).show();
 
+                lastObjectPosition = position;
                 Intent intent = new Intent(getActivity(),ChatOneToOne.class);
                 intent.putExtra("CHAT_USER_OBJECT",chatUserObjects.get(position));
 //                intent.putExtra("USER_NUMBER",contactsList.get(position));
                 intent.putExtra("PROFILE_NUMBER",profileNumber);
-                startActivity(intent);
+                startActivityForResult(intent, 1);
             }
         });
 
@@ -120,6 +165,7 @@ public class ContactsFragment extends Fragment {
 //                    contactsList.add(i.getMobileNum());
                     contactsName.add(i.getDisplayName());
 //                    contactsPhotos.add(i.getPhotoUrl());
+                    Log.v(TAG,"amazonDB executed");
                 }
             }
 

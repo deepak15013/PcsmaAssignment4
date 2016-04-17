@@ -62,7 +62,7 @@
             android:orientation="vertical"
             android:layout_above="@+id/send_layout">
 
-            <ScrollView
+            <!--<ScrollView
                 android:id="@+id/sv_chat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -74,7 +74,16 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            </ScrollView>
+            </ScrollView>-->
+
+            <ListView
+                android:id="@+id/message_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:transcriptMode="alwaysScroll"
+                android:listSelector="@android:color/transparent"
+                android:divider="@null">
+            </ListView>
 
         </LinearLayout>
 
