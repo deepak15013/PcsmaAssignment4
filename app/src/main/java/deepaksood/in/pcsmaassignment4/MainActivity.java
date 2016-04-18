@@ -202,6 +202,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_broadcast) {
             Toast.makeText(MainActivity.this, "BroadCast Message", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, BroadcastActivity.class);
+            intent.putExtra("PROFILE_NUMBER",mobileNumText);
             startActivity(intent);
 
         } else if (id == R.id.nav_gallery) {

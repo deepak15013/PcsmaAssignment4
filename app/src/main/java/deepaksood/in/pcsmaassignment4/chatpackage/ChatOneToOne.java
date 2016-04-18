@@ -47,7 +47,6 @@ public class ChatOneToOne extends AppCompatActivity {
     Button btnSend;
 //    ScrollView scChat;
 
-    Thread subscribeThread;
     Thread publishThread;
     private BlockingDeque queue = new LinkedBlockingDeque();
     private String profileNumber = "";
@@ -67,7 +66,6 @@ public class ChatOneToOne extends AppCompatActivity {
         setContentView(R.layout.activity_chat_one_to_one);
 
         Bundle bundle = getIntent().getExtras();
-//        userNumber = bundle.getString("USER_NUMBER");
         profileNumber = bundle.getString("PROFILE_NUMBER");
         chatUserObject = (ChatUserObject) getIntent().getSerializableExtra("CHAT_USER_OBJECT");
         position = bundle.getInt("POSITION");
@@ -212,16 +210,6 @@ public class ChatOneToOne extends AppCompatActivity {
     ConnectionFactory factory = new ConnectionFactory();
     public void setUpConnectionFactory() {
         factory.setAutomaticRecoveryEnabled(false);
-
-        /*try {
-            factory.setUri("amqp://pmkrlkkw:GB1jKxGoJX8ya_vywroGbvsdP3SQqFhI@fox.rmq.cloudamqp.com/pmkrlkkw");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        }*/
         factory.setHost("52.207.235.200");
         factory.setUsername("deepak");
         factory.setPassword("deepak");
@@ -322,53 +310,6 @@ public class ChatOneToOne extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    Channel subChannel;
-    Connection subConnection;
-    void subscribe(final Handler handler)
-    {
-        subscribeThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    try {
-                        Log.v(TAG,"Creating connection of subscriber in chatOneTOOne");
-                        if(subConnection == null) {
-                            subConnection = factory.newConnection();
-                        }
-                        subChannel = subConnection.createChannel();
-                        subChannel.basicQos(1);
-                        Log.v(TAG,"userNumber inside subsribe: "+profileNumber);
-                        AMQP.Queue.DeclareOk q = subChannel.queueDeclare(profileNumber,true,true,false,null);
-                        subChannel.queueBind(q.getQueue(), "amq.fanout", "chat");
-                        QueueingConsumer consumer = new QueueingConsumer(subChannel);
-                        subChannel.basicConsume(q.getQueue(), true, consumer);
-
-                        while (true) {
-                            QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-                            String message = new String(delivery.getBody());
-                            Log.d("","[r] " + message);
-                            Message msg = handler.obtainMessage();
-                            Bundle bundle = new Bundle();
-                            bundle.putString("msg", message);
-                            msg.setData(bundle);
-                            handler.sendMessage(msg);
-                        }
-                    } catch (InterruptedException e) {
-                        break;
-                    } catch (Exception e1) {
-                        Log.d("", "Connection broken sub: " + e1.getClass().getName());
-                        try {
-                            Thread.sleep(5000); //sleep and then try again
-                        } catch (InterruptedException e) {
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-        subscribeThread.start();
     }
 
 }
