@@ -1,4 +1,4 @@
-package deepaksood.in.pcsmaassignment4.ChatPackage;
+package deepaksood.in.pcsmaassignment4.chatpackage;
 
 import android.app.Activity;
 import android.content.Context;

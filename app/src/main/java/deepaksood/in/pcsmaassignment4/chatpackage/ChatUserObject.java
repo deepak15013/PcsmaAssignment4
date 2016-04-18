@@ -1,4 +1,4 @@
-package deepaksood.in.pcsmaassignment4.ChatPackage;
+package deepaksood.in.pcsmaassignment4.chatpackage;
 
 import android.util.Log;
 
@@ -26,7 +26,6 @@ public class ChatUserObject implements Serializable{
         this.chatUserDisplayEmailId = chatUserDisplayEmailId;
         this.chatUserCoverUrl = chatUserCoverUrl;
         chatMessages = new ArrayList<>();
-        Log.v(TAG,"new Chat User object ");
     }
 
     public ArrayList<ChatMessage> getChatMessages() {

@@ -1,4 +1,4 @@
-package deepaksood.in.pcsmaassignment4.ChatPackage;
+package deepaksood.in.pcsmaassignment4.chatpackage;
 
 import java.io.Serializable;
 

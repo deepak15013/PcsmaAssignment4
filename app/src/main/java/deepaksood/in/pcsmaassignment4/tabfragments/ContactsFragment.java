@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
@@ -22,9 +21,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import java.util.ArrayList;
 import java.util.List;
 
-import deepaksood.in.pcsmaassignment4.ChatPackage.ChatMessage;
-import deepaksood.in.pcsmaassignment4.ChatPackage.ChatOneToOne;
-import deepaksood.in.pcsmaassignment4.ChatPackage.ChatUserObject;
+import deepaksood.in.pcsmaassignment4.chatpackage.ChatMessage;
+import deepaksood.in.pcsmaassignment4.chatpackage.ChatOneToOne;
+import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.MainActivity;
 import deepaksood.in.pcsmaassignment4.R;
 import deepaksood.in.pcsmaassignment4.UserObject;
@@ -43,7 +42,7 @@ public class ContactsFragment extends Fragment {
     List<String> contactsName;
 //    List<String> contactsPhotos;
 
-    List<ChatUserObject> chatUserObjects;
+    public static List<ChatUserObject> chatUserObjects;
 
     private String profileNumber = "";
 
@@ -132,6 +131,7 @@ public class ContactsFragment extends Fragment {
                 intent.putExtra("CHAT_USER_OBJECT",chatUserObjects.get(position));
 //                intent.putExtra("USER_NUMBER",contactsList.get(position));
                 intent.putExtra("PROFILE_NUMBER",profileNumber);
+                intent.putExtra("POSITION",position);
                 startActivityForResult(intent, 1);
             }
         });
@@ -165,7 +165,6 @@ public class ContactsFragment extends Fragment {
 //                    contactsList.add(i.getMobileNum());
                     contactsName.add(i.getDisplayName());
 //                    contactsPhotos.add(i.getPhotoUrl());
-                    Log.v(TAG,"amazonDB executed");
                 }
             }
 
@@ -193,5 +192,4 @@ public class ContactsFragment extends Fragment {
 
         }
     }
-
 }

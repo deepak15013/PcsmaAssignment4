@@ -6,12 +6,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name="android.support.multidex.MultiDexApplication">
+        android:theme="@style/AppTheme">
         <activity
             android:name=".AddMobileActivity"
             android:screenOrientation="portrait">
@@ -30,8 +30,14 @@
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".ChatPackage.ChatOneToOne"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".chatpackage.ChatOneToOne"
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name=".servicepackage.RabbitMqService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 
 </manifest>

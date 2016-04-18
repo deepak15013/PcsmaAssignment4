@@ -10,10 +10,9 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import deepaksood.in.pcsmaassignment4.ChatPackage.ChatUserObject;
+import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.R;
 
 /**

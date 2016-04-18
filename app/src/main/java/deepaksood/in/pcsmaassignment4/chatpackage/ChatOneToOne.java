@@ -1,7 +1,9 @@
-package deepaksood.in.pcsmaassignment4.ChatPackage;
+package deepaksood.in.pcsmaassignment4.chatpackage;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -14,9 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -26,20 +26,15 @@ import com.rabbitmq.client.QueueingConsumer;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeoutException;
 
-import deepaksood.in.pcsmaassignment4.MainActivity;
 import deepaksood.in.pcsmaassignment4.R;
+import deepaksood.in.pcsmaassignment4.servicepackage.RabbitMqService;
 import deepaksood.in.pcsmaassignment4.tabfragments.ContactsFragment;
 
 public class ChatOneToOne extends AppCompatActivity {
@@ -47,8 +42,7 @@ public class ChatOneToOne extends AppCompatActivity {
     private static final String TAG = ChatOneToOne.class.getSimpleName();
 
     String userNumber;
-
-    TextView chatContent;
+    int position;
     EditText etSend;
     Button btnSend;
 //    ScrollView scChat;
@@ -76,6 +70,8 @@ public class ChatOneToOne extends AppCompatActivity {
 //        userNumber = bundle.getString("USER_NUMBER");
         profileNumber = bundle.getString("PROFILE_NUMBER");
         chatUserObject = (ChatUserObject) getIntent().getSerializableExtra("CHAT_USER_OBJECT");
+        position = bundle.getInt("POSITION");
+        Log.v(TAG,"Position clicked: "+position);
         Log.v(TAG,"profileNumber: "+profileNumber);
         userNumber = chatUserObject.getChatuserMobileNum();
 
@@ -107,41 +103,33 @@ public class ChatOneToOne extends AppCompatActivity {
 
         messageContainer = (ListView) findViewById(R.id.message_container);
 
-        loadDummyHistory();
+        loadChatHistory();
 
         setUpConnectionFactory();
         publishToAMQP();
         setUpPubButton();
 
-        final Handler incomingMessageHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                String message = msg.getData().getString("msg");
-                Date now = new Date();
-                SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
-                Log.v(TAG,"messageReceived-----------: "+message);
-                //chatContent.append(ft.format(now) + ' ' + message + '\n');
-//                scChat.fullScroll(View.FOCUS_DOWN);
-            }
-        };
-        subscribe(incomingMessageHandler);
+        registerReceiver(broadcastReceiver, new IntentFilter(RabbitMqService.BROADCAST_ACTION));
 
     }
 
-    private void loadDummyHistory(){
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("MESSAGE");
+            ChatMessage chatMessage;
+            chatMessage = new ChatMessage();
+            chatMessage.setMe(false);
+            chatMessage.setMessage(message);
+            chatMessage.setDate("today");
 
-        /*ChatMessage msg = new ChatMessage();
-        msg.setId(1);
-        msg.setMe(false);
-        msg.setMessage("Hi");
-        msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatHistory.add(msg);
-        ChatMessage msg1 = new ChatMessage();
-        msg1.setId(2);
-        msg1.setMe(false);
-        msg1.setMessage("How r u doing???");
-        msg1.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatHistory.add(msg1);*/
+            printChat(message, false);
+
+        }
+    };
+
+
+    private void loadChatHistory(){
 
         adapter = new ChatAdapter(ChatOneToOne.this, new ArrayList<ChatMessage>());
         messageContainer.setAdapter(adapter);
@@ -161,6 +149,7 @@ public class ChatOneToOne extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        ContactsFragment.chatUserObjects.set(position, chatUserObject);
         try {
             if(publishThread.isAlive()) {
                 Log.v(TAG,"thread running");
@@ -206,6 +195,8 @@ public class ChatOneToOne extends AppCompatActivity {
     protected void onDestroy() {
         Log.v(TAG,"OnDestroy chat one to one");
         super.onDestroy();
+        if(broadcastReceiver != null)
+            unregisterReceiver(broadcastReceiver);
     }
 
     ConnectionFactory factory = new ConnectionFactory();
@@ -243,7 +234,7 @@ public class ChatOneToOne extends AppCompatActivity {
                         pubChannel.confirmSelect();
 
                         while (true) {
-                            String message = "from:"+profileNumber +" "+ queue.takeFirst().toString()+" " + "to:"+userNumber;
+                            String message = profileNumber +":"+ queue.takeFirst().toString();
                             Log.v(TAG,"Message: "+message);
                             try{
                                 Log.v(TAG,"publish UserNumber: "+userNumber);
@@ -280,9 +271,7 @@ public class ChatOneToOne extends AppCompatActivity {
             @Override
             public void onClick(View arg0) {
                 if(etSend.getText() != null && !etSend.getText().toString().equals("") && !etSend.getText().toString().equals(" ")) {
-                    printChat();
-//                    chatContent.append(profileNumber+": "+etSend.getText().toString()+"\n");
-//                    scChat.fullScroll(View.FOCUS_DOWN);
+                    printChat(etSend.getText().toString(),true);
                     publishMessage(etSend.getText().toString());
                     etSend.setText("");
                 }
@@ -290,11 +279,11 @@ public class ChatOneToOne extends AppCompatActivity {
         });
     }
 
-    public void printChat() {
+    public void printChat(String msg, boolean meOrNot) {
         ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setMessage(etSend.getText().toString());
+        chatMessage.setMessage(msg);
         chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatMessage.setMe(true);
+        chatMessage.setMe(meOrNot);
 
         displayMessage(chatMessage);
 
@@ -334,8 +323,10 @@ public class ChatOneToOne extends AppCompatActivity {
             public void run() {
                 while(true) {
                     try {
-                        if(subConnection == null)
+                        Log.v(TAG,"Creating connection of subscriber in chatOneTOOne");
+                        if(subConnection == null) {
                             subConnection = factory.newConnection();
+                        }
                         subChannel = subConnection.createChannel();
                         subChannel.basicQos(1);
                         Log.v(TAG,"userNumber inside subsribe: "+profileNumber);

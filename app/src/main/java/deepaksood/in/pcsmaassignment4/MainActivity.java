@@ -1,6 +1,9 @@
 package deepaksood.in.pcsmaassignment4;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -39,6 +42,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import deepaksood.in.pcsmaassignment4.chatpackage.ChatMessage;
+import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
+import deepaksood.in.pcsmaassignment4.servicepackage.RabbitMqService;
 import deepaksood.in.pcsmaassignment4.tabfragments.ChatsFragment;
 import deepaksood.in.pcsmaassignment4.tabfragments.ContactsFragment;
 import deepaksood.in.pcsmaassignment4.tabfragments.TimelineFragment;
@@ -68,8 +74,11 @@ public class MainActivity extends AppCompatActivity
 
     private GoogleApiClient mGoogleApiClient;
 
+    Intent serviceIntent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.v(TAG,"OnCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -100,7 +109,12 @@ public class MainActivity extends AppCompatActivity
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
+        serviceIntent = new Intent(getBaseContext(), RabbitMqService.class);
+        serviceIntent.putExtra("USER_QUEUE",mobileNumText);
+        startService(serviceIntent);
+
     }
+
 
     public void getDataFromPrefManager() {
         prefManager = new PrefManager(getApplicationContext());
@@ -269,4 +283,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        Log.v(TAG,"onDestroy MainActivity Stopping SErvice");
+        super.onDestroy();
+        if(serviceIntent != null)
+            stopService(serviceIntent);
+    }
 }

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="deepaksood.in.pcsmaassignment4.ChatPackage.ChatOneToOne">
+    tools:context="deepaksood.in.pcsmaassignment4.chatpackage.ChatOneToOne">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/chat_toolbar"
@@ -59,22 +59,9 @@
             android:id="@+id/ll_chatBox"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:padding="12dp"
             android:orientation="vertical"
             android:layout_above="@+id/send_layout">
-
-            <!--<ScrollView
-                android:id="@+id/sv_chat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/chat_content"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
-
-            </ScrollView>-->
 
             <ListView
                 android:id="@+id/message_container"
