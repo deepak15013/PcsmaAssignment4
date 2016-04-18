@@ -1,10 +1,6 @@
 package deepaksood.in.pcsmaassignment4;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -27,10 +23,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -42,13 +34,12 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import deepaksood.in.pcsmaassignment4.addgrouppackage.AddGroup;
 import deepaksood.in.pcsmaassignment4.broadcastpackage.BroadcastActivity;
-import deepaksood.in.pcsmaassignment4.chatpackage.ChatMessage;
-import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.servicepackage.RabbitMqService;
 import deepaksood.in.pcsmaassignment4.tabfragments.ChatsFragment;
 import deepaksood.in.pcsmaassignment4.tabfragments.ContactsFragment;
-import deepaksood.in.pcsmaassignment4.tabfragments.TimelineFragment;
+import deepaksood.in.pcsmaassignment4.tabfragments.GroupsFragment;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
@@ -205,11 +196,10 @@ public class MainActivity extends AppCompatActivity
             intent.putExtra("PROFILE_NUMBER",mobileNumText);
             startActivity(intent);
 
-        } else if (id == R.id.nav_gallery) {
-            Toast.makeText(MainActivity.this, "gallery", Toast.LENGTH_SHORT).show();
-
-        } else if (id == R.id.nav_slideshow) {
-            Toast.makeText(MainActivity.this, "slideshow", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_add_group) {
+            Toast.makeText(MainActivity.this, "Add Group", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, AddGroup.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_log_out) {
             Toast.makeText(MainActivity.this, "log out", Toast.LENGTH_SHORT).show();
@@ -222,9 +212,12 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_share) {
             Toast.makeText(MainActivity.this, "share", Toast.LENGTH_SHORT).show();
 
-        } else if (id == R.id.nav_send) {
-            Toast.makeText(MainActivity.this, "send", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_contact_us) {
+            Toast.makeText(MainActivity.this, "contact us", Toast.LENGTH_SHORT).show();
 
+        }
+        else if (id == R.id.nav_help) {
+            Toast.makeText(MainActivity.this, "Help & Feedback", Toast.LENGTH_SHORT).show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -245,7 +238,7 @@ public class MainActivity extends AppCompatActivity
     ViewPagerAdapter adapter;
     private void setupViewPager(ViewPager viewPager) {
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new TimelineFragment(), "TIMELINE");
+        adapter.addFragment(new GroupsFragment(), "Groups");
         adapter.addFragment(new ChatsFragment(), "CHATS");
         adapter.addFragment(new ContactsFragment(), "CONTACTS");
         viewPager.setAdapter(adapter);

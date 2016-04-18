@@ -42,6 +42,8 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
     @Bind(R.id.btn_register) Button register;
     @Bind(R.id.sign_in_status) TextView mStatusTextView;
     @Bind(R.id.registered_mobile_num) TextView registeredMobileNum;
+    @Bind(R.id.et_register_profile_name) TextView etRegisterProfileName;
+    @Bind(R.id.et_register_email_id) TextView etRegisterEmailId;
 
     private static String mobileNumText;
 
@@ -176,11 +178,11 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
     }
 
     public void checkName() {
-
+        displayName = etRegisterProfileName.getText().toString();
     }
 
     public void checkEmail() {
-
+        displayEmailId = etRegisterEmailId.getText().toString();
     }
 
     @Override

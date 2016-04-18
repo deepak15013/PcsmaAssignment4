@@ -165,6 +165,7 @@ public class ChatsFragment extends Fragment {
             chatMessage.setMessage(pureMessage);
             chatMessage.setMe(false);
             chatMessage.setDate("today");
+            Log.v(TAG,"---------------"+message);
 
             for(int k=0; k< ContactsFragment.chatUserObjects.size();k++) {
                 if(ContactsFragment.chatUserObjects.get(k).getChatuserMobileNum().equals(sender)) {

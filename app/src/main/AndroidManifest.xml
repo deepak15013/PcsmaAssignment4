@@ -39,7 +39,8 @@
             android:enabled="true"
             android:exported="false" />
 
-        <activity android:name=".broadcastpackage.BroadcastActivity"></activity>
+        <activity android:name=".broadcastpackage.BroadcastActivity" />
+        <activity android:name=".addgrouppackage.AddGroup"></activity>
     </application>
 
 </manifest>

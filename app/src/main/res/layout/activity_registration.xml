@@ -28,20 +28,20 @@
         android:padding="16dp"/>
 
     <EditText
+        android:id="@+id/et_register_profile_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
         android:text="Profile Name"
         android:ems="10"
-        android:id="@+id/editText"
         android:layout_gravity="center_horizontal" />
 
     <EditText
+        android:id="@+id/et_register_email_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textEmailAddress"
         android:ems="10"
-        android:id="@+id/editText2"
         android:hint="Email"/>
 
     <Button
