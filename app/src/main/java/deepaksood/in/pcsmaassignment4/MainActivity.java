@@ -42,6 +42,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import deepaksood.in.pcsmaassignment4.broadcastpackage.BroadcastActivity;
 import deepaksood.in.pcsmaassignment4.chatpackage.ChatMessage;
 import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.servicepackage.RabbitMqService;
@@ -198,9 +199,10 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-            Toast.makeText(MainActivity.this, "camera", Toast.LENGTH_SHORT).show();
+        if (id == R.id.nav_broadcast) {
+            Toast.makeText(MainActivity.this, "BroadCast Message", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, BroadcastActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_gallery) {
             Toast.makeText(MainActivity.this, "gallery", Toast.LENGTH_SHORT).show();

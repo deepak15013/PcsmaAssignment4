@@ -22,8 +22,6 @@ public class ContactsListAdapter extends ArrayAdapter<String> {
 
     private final Activity context;
     private final String[] name;
-    //private final String[] number;
-    //private final String[] photo;
     private final List<ChatUserObject> chatUserObjects;
 
     public ContactsListAdapter(Activity context, List<ChatUserObject> chatUserObjects, String[] name) {

@@ -65,7 +65,6 @@ public class ContactsFragment extends Fragment {
         profileNumber = mainActivity.getMobileNumText();
 
 //        adapter = new ContactsListAdapter(getActivity(), web , mobileArray);
-
         new db().execute();
     }
 

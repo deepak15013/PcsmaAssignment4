@@ -18,6 +18,7 @@ public class ChatUserObject implements Serializable{
     private String chatUserDisplayEmailId;
     private String chatUserCoverUrl;
     public ArrayList<ChatMessage> chatMessages;
+    public boolean isSelected = false;
 
     public ChatUserObject(String chatuserMobileNum, String chatUserDisplayName, String chatUserPhotoUrl, String chatUserDisplayEmailId, String chatUserCoverUrl) {
         this.chatuserMobileNum = chatuserMobileNum;
@@ -26,6 +27,14 @@ public class ChatUserObject implements Serializable{
         this.chatUserDisplayEmailId = chatUserDisplayEmailId;
         this.chatUserCoverUrl = chatUserCoverUrl;
         chatMessages = new ArrayList<>();
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
     }
 
     public ArrayList<ChatMessage> getChatMessages() {

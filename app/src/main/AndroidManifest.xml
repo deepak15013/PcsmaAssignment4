@@ -37,7 +37,9 @@
         <service
             android:name=".servicepackage.RabbitMqService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
+
+        <activity android:name=".broadcastpackage.BroadcastActivity"></activity>
     </application>
 
 </manifest>

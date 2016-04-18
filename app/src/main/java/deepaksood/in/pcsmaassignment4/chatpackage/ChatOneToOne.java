@@ -117,13 +117,23 @@ public class ChatOneToOne extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("MESSAGE");
-            ChatMessage chatMessage;
-            chatMessage = new ChatMessage();
-            chatMessage.setMe(false);
-            chatMessage.setMessage(message);
-            chatMessage.setDate("today");
 
-            printChat(message, false);
+            String sender="";
+            String pureMessage="";
+            boolean temp=true;
+            for(String token : message.split(":")) {
+                Log.v(TAG,"token: "+token);
+                if(temp) {
+                    sender = token;
+                    temp = false;
+                }
+                else {
+                    pureMessage = token;
+                }
+            }
+            Log.v(TAG,"pure: "+pureMessage);
+
+            printChat(pureMessage, false);
 
         }
     };

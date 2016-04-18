@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="deepaksood.in.pcsmaassignment4.broadcastpackage.BroadcastActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/broadcast_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    <TextView
+        android:id="@+id/selecttext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Contacts to Send Message"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/broadcast_toolbar"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp"/>
+
+    <View
+        android:id="@+id/list_seperator"
+        android:layout_below="@id/selecttext"
+        android:layout_width="370dp"
+        android:layout_height="1dp"
+        android:background="#999999"
+        android:layout_centerHorizontal="true" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/list_seperator">
+
+        <LinearLayout
+            android:id="@+id/ll_chatBox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp"
+            android:orientation="vertical"
+            android:layout_above="@+id/send_layout">
+
+            <ListView
+                android:id="@+id/lv_select_contacts_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:transcriptMode="alwaysScroll"
+                android:listSelector="@android:color/transparent"
+                android:divider="@null">
+            </ListView>
+
+        </LinearLayout>
+
+        <View
+            android:layout_below="@+id/ll_chatBox"
+            android:layout_width="370dp"
+            android:layout_height="1dp"
+            android:background="#999999"
+            android:layout_centerHorizontal="true"
+            />
+
+        <LinearLayout
+            android:id="@+id/send_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="4dp"
+            android:paddingBottom="12dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp">
+
+            <EditText
+                android:id="@+id/et_broadcast_message"
+                android:layout_width="250dp"
+                android:hint="Type a message..."
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/btn_broadcast_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:text="SEND"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

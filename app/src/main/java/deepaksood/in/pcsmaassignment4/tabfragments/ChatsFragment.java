@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -29,7 +30,9 @@ import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeoutException;
@@ -37,6 +40,7 @@ import java.util.concurrent.TimeoutException;
 import deepaksood.in.pcsmaassignment4.MainActivity;
 import deepaksood.in.pcsmaassignment4.R;
 import deepaksood.in.pcsmaassignment4.chatpackage.ChatMessage;
+import deepaksood.in.pcsmaassignment4.chatpackage.ChatOneToOne;
 import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.servicepackage.RabbitMqService;
 
@@ -49,6 +53,14 @@ public class ChatsFragment extends Fragment {
 
     ListView chatList;
 
+    ChatsListAdapter chatAdapter;
+
+    private String profileNumber = "";
+    private int lastObjectPosition;
+    boolean alreadyPresent = false;
+
+    public static List<ChatUserObject> chatUserObjects;
+//    List<String> contactsName;
 
     public ChatsFragment() {
         // Required empty public constructor
@@ -59,8 +71,18 @@ public class ChatsFragment extends Fragment {
         Log.v(TAG,"onCreate");
         super.onCreate(savedInstanceState);
 
+//        contactsName = new ArrayList<>();
+        chatUserObjects = new ArrayList<>();
+
         getActivity().registerReceiver(broadcastReceiver, new IntentFilter(RabbitMqService.BROADCAST_ACTION));
 
+//        String[] contactsArrayName = new String[contactsName.size()];
+//        contactsArrayName = contactsName.toArray(contactsArrayName);
+
+        chatAdapter = new ChatsListAdapter(getActivity(), chatUserObjects);
+
+        MainActivity mainActivity = (MainActivity) getActivity();
+        profileNumber = mainActivity.getMobileNumText();
     }
 
 
@@ -75,7 +97,45 @@ public class ChatsFragment extends Fragment {
 
         chatList.setAdapter(chatAdapter);
 
+        chatList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                lastObjectPosition = position;
+                Log.v(TAG,"itemClicked: "+position);
+                Intent intent = new Intent(getActivity(),ChatOneToOne.class);
+                intent.putExtra("CHAT_USER_OBJECT",chatUserObjects.get(position));
+//                intent.putExtra("USER_NUMBER",contactsList.get(position));
+                intent.putExtra("PROFILE_NUMBER",profileNumber);
+                intent.putExtra("POSITION",position);
+                startActivityForResult(intent, 1);
+            }
+        });
+
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == 1) {
+            Bundle bundle = data.getExtras();
+            if(bundle != null) {
+                ChatUserObject chatUserObject = (ChatUserObject) bundle.getSerializable("CHAT_USER_OBJECT_BACK");
+                if(chatUserObject != null) {
+                    Log.v(TAG,"chatUserObject: "+chatUserObject);
+                    Log.v(TAG,"onj: "+chatUserObject.getChatUserDisplayName());
+                    ContactsFragment.chatUserObjects.set(lastObjectPosition, chatUserObject);
+                }
+                else {
+                    Log.v(TAG,"nullChatUserObject");
+                }
+
+            }
+            //Log.v(TAG,"chatUserObject: "+chatUserObject.getChatMessages().get(0));
+        }
+        else{
+            Log.v(TAG,"onActivityResult cancelled");
+        }
     }
 
     @Override
@@ -87,13 +147,11 @@ public class ChatsFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("MESSAGE");
-            Log.v(TAG,"message got here: "+message);
 
             String sender="";
             String pureMessage="";
             boolean temp=true;
             for(String token : message.split(":")) {
-                Log.v(TAG,"token: "+token);
                 if(temp) {
                     sender = token;
                     temp = false;
@@ -102,8 +160,6 @@ public class ChatsFragment extends Fragment {
                     pureMessage = token;
                 }
             }
-            Log.v(TAG,"message: "+pureMessage);
-            Log.v(TAG,"sender: "+sender);
 
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setMessage(pureMessage);
@@ -114,6 +170,23 @@ public class ChatsFragment extends Fragment {
                 if(ContactsFragment.chatUserObjects.get(k).getChatuserMobileNum().equals(sender)) {
                     Log.v(TAG,"found: "+ContactsFragment.chatUserObjects.get(k).getChatuserMobileNum());
                     ContactsFragment.chatUserObjects.get(k).chatMessages.add(chatMessage);
+                    Log.v(TAG,"size: "+chatUserObjects.size());
+
+                    for(int l=0;l<chatUserObjects.size();l++) {
+                        if(ContactsFragment.chatUserObjects.get(k).equals(chatUserObjects.get(l))) {
+                            alreadyPresent = true;
+                        }
+                    }
+
+                    if(!alreadyPresent) {
+                        chatUserObjects.add(ContactsFragment.chatUserObjects.get(k));
+                        chatAdapter.add(message);
+                        chatAdapter.notifyDataSetChanged();
+                    }
+                    else {
+                        chatAdapter.notifyDataSetChanged();
+                    }
+
                     break;
                 }
             }
@@ -124,6 +197,7 @@ public class ChatsFragment extends Fragment {
                     Log.v(TAG,"j: "+j.getMessage());
                 }
             }
+
 
         }
     };

@@ -1,6 +1,7 @@
 package deepaksood.in.pcsmaassignment4.tabfragments;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,10 +22,13 @@ import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
  */
 public class ChatsListAdapter extends ArrayAdapter<String> {
 
+    private static final String TAG = ChatsListAdapter.class.getSimpleName();
+
     private final Activity context;
     private final List<ChatUserObject> chatUserObjects;
 
     public ChatsListAdapter(Activity context, List<ChatUserObject> chatUserObjects) {
+        super(context, R.layout.chat_list_item);
         this.context = context;
         this.chatUserObjects = chatUserObjects;
     }
@@ -38,7 +42,9 @@ public class ChatsListAdapter extends ArrayAdapter<String> {
         ImageView imageViewPhoto = (ImageView) rowView.findViewById(R.id.iv_chat_contact_pic);
 
         chatName.setText(chatUserObjects.get(position).getChatUserDisplayName());
-        lastChat.setText(chatUserObjects.get(position).getChatuserMobileNum());
+        int size = chatUserObjects.get(position).getChatMessages().size();
+        Log.v(TAG,"size: "+size);
+        lastChat.setText(chatUserObjects.get(position).getChatMessages().get(size-1).getMessage());
 
         if(chatUserObjects.get(position).getChatUserPhotoUrl() != null) {
             Picasso.with(getContext()).load(chatUserObjects.get(position).getChatUserPhotoUrl()).into(imageViewPhoto);
