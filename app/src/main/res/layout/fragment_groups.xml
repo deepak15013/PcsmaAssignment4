@@ -4,6 +4,10 @@
     android:layout_height="match_parent"
     tools:context=".tabfragments.GroupsFragment">
 
-
+    <ListView
+        android:id="@+id/groups_list_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </ListView>
 
 </RelativeLayout>

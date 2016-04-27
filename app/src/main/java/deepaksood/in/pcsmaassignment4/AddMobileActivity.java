@@ -10,7 +10,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -41,6 +43,11 @@ public class AddMobileActivity extends AppCompatActivity implements View.OnClick
     @Bind(R.id.btn_otp_submit) Button submit;
     @Bind(R.id.et_otp) EditText etOtp;
     @Bind(R.id.viewPagerVertical) ViewPager viewPager;
+    @Bind(R.id.ib_mobile_num_edit)
+    ImageButton ibMobileNumEdit;
+
+    @Bind(R.id.tv_mobile_num_edit)
+    TextView tvMobileNumEdit;
 
     private ViewPagerAdapter adapter;
 
@@ -91,6 +98,7 @@ public class AddMobileActivity extends AppCompatActivity implements View.OnClick
 
         next.setOnClickListener(this);
         submit.setOnClickListener(this);
+        ibMobileNumEdit.setOnClickListener(this);
 
     }
 
@@ -106,6 +114,7 @@ public class AddMobileActivity extends AppCompatActivity implements View.OnClick
                     generateURL();
                     //sendOTP();
                     viewPager.setCurrentItem(1);
+                    tvMobileNumEdit.setText(mobileNumText);
 
                 }
                 else {
@@ -132,6 +141,11 @@ public class AddMobileActivity extends AppCompatActivity implements View.OnClick
                     Toast.makeText(AddMobileActivity.this, "enter a six digit otp", Toast.LENGTH_SHORT).show();
                 }
 
+                break;
+
+            case R.id.ib_mobile_num_edit:
+                Toast.makeText(AddMobileActivity.this, "edit Mobile Num", Toast.LENGTH_SHORT).show();
+                viewPager.setCurrentItem(0);
                 break;
         }
     }
