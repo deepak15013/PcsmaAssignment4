@@ -17,16 +17,20 @@ import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeoutException;
 
 import deepaksood.in.pcsmaassignment4.R;
-import deepaksood.in.pcsmaassignment4.broadcastpackage.BroadcastAdapter;
 import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.tabfragments.ContactsFragment;
 
@@ -41,9 +45,11 @@ public class AddGroup extends AppCompatActivity {
     EditText groupName;
 
     private String profileNumber = "";
-    private String userNumber;
 
     private int numOfSelectedUsers=0;
+
+    Thread publishThread;
+    private BlockingDeque queue = new LinkedBlockingDeque();
 
     public static List<ChatUserObject> chatUserObjects;
 
@@ -105,6 +111,9 @@ public class AddGroup extends AppCompatActivity {
 
                         Toast.makeText(AddGroup.this, "Group Added", Toast.LENGTH_SHORT).show();
                         addGroupNameToDatabase();
+                        sendNewGroupMessage();
+
+
                         onBackPressed();
                     } else {
                         Toast.makeText(AddGroup.this, "Please enter a group name", Toast.LENGTH_SHORT).show();
@@ -127,7 +136,7 @@ public class AddGroup extends AppCompatActivity {
         groupObject.setGroupPhotoUrl("https://drive.google.com/uc?id=0B1jHFoEHN0zfWXFuNzFUdTNYVHc");
         groupObject.setGroupCoverUrl("https://drive.google.com/uc?id=0B1jHFoEHN0zfdDUwemhnenZlanc");
 
-        groupObject.setGroupOwner("1234567890");
+        groupObject.setGroupOwner(profileNumber);
 
         new db().execute();
 
@@ -142,6 +151,36 @@ public class AddGroup extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        try {
+            if(publishThread != null) {
+                if(publishThread.isAlive()) {
+                    Log.v(TAG,"thread running");
+                }
+            }
+            if(pubChannel != null) {
+                if(pubChannel.isOpen())
+                    pubChannel.close();
+            }
+            if(pubConnection != null) {
+                if(pubConnection.isOpen())
+                    pubConnection.close();
+            }
+            if(publishThread != null) {
+                publishThread.interrupt();
+                if(!publishThread.isAlive()) {
+                    Log.v(TAG,"thread stopped");
+                }
+                else {
+                    Log.v(TAG,"not stopped");
+                }
+            }
+            Log.v(TAG,"ConnectionClosed AddGroup");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
         finish();
     }
 
@@ -178,6 +217,83 @@ public class AddGroup extends AppCompatActivity {
 
             return "Executed";
         }
+    }
+
+    public String memberNumber="";
+    public void sendNewGroupMessage() {
+        setUpConnectionFactory();
+        publishToAMQP();
+        String message = groupNameText+":"+profileNumber+" added you";
+        Log.v(TAG,"msg: "+message);
+        for(String i: broadcastList) {
+            memberNumber = i;
+            publishMessage(message);
+        }
+    }
+
+    ConnectionFactory factory = new ConnectionFactory();
+    public void setUpConnectionFactory() {
+        factory.setAutomaticRecoveryEnabled(false);
+        factory.setHost("52.207.235.200");
+        factory.setUsername("deepak");
+        factory.setPassword("deepak");
+
+    }
+
+    void publishMessage(String message) {
+        try {
+            Log.d("", "[q] " + message);
+            queue.putLast(message);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    Connection pubConnection;
+    Channel pubChannel;
+    public void publishToAMQP()
+    {
+        publishThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        Log.v(TAG,"ConnectionCreated ChatOOneToOne");
+                        if(pubConnection == null)
+                            pubConnection = factory.newConnection();
+                        pubChannel = pubConnection.createChannel();
+                        pubChannel.exchangeDeclare(groupNameText,"fanout");
+
+                        pubChannel.confirmSelect();
+
+                        while (true) {
+                            String message = queue.takeFirst().toString();
+                            Log.v(TAG,"Message: "+message);
+                            try{
+                                Log.v(TAG,"publish UserNumber: "+memberNumber);
+
+                                pubChannel.basicPublish(groupNameText, "", null, message.getBytes());
+                                pubChannel.waitForConfirmsOrDie();
+                            } catch (Exception e){
+                                Log.d("","[f] " + message);
+                                queue.putFirst(message);
+                                throw e;
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        break;
+                    } catch (Exception e) {
+                        Log.d("", "Connection broken pub: " + e.getClass().getName());
+                        try {
+                            Thread.sleep(5000); //sleep and then try again
+                        } catch (InterruptedException e1) {
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+        publishThread.start();
     }
 
 }

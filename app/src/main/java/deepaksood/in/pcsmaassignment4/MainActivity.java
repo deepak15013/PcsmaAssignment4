@@ -199,6 +199,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_add_group) {
             Toast.makeText(MainActivity.this, "Add Group", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, AddGroup.class);
+            intent.putExtra("PROFILE_NUMBER",mobileNumText);
             startActivity(intent);
 
         } else if (id == R.id.nav_log_out) {

@@ -1,6 +1,7 @@
 package deepaksood.in.pcsmaassignment4.tabfragments;
 
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -25,6 +27,7 @@ import deepaksood.in.pcsmaassignment4.R;
 import deepaksood.in.pcsmaassignment4.UserObject;
 import deepaksood.in.pcsmaassignment4.addgrouppackage.GroupObject;
 import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
+import deepaksood.in.pcsmaassignment4.groupchat.GroupChatActivity;
 
 
 public class GroupsFragment extends Fragment {
@@ -37,7 +40,7 @@ public class GroupsFragment extends Fragment {
     CognitoCachingCredentialsProvider credentialsProvider;
     PaginatedScanList<GroupObject> result;
 
-    public List<GroupItemObject> groupItemObjects;
+    public static List<GroupItemObject> groupItemObjects;
 
     public GroupsFragment() {
         // Required empty public constructor
@@ -49,6 +52,19 @@ public class GroupsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         groupItemObjects = new ArrayList<>();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.v(TAG,"onPause");
+        groupItemObjects.clear();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.v(TAG,"onResume");
         new db().execute();
     }
 
@@ -61,6 +77,18 @@ public class GroupsFragment extends Fragment {
 
         list = (ListView) view.findViewById(R.id.groups_list_container);
         list.setAdapter(groupsListAdapter);
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), GroupChatActivity.class);
+                intent.putExtra("GROUP_NAME",groupItemObjects.get(position).getGroupName());
+                intent.putExtra("OWNER_NAME",groupItemObjects.get(position).getOwnerName());
+                intent.putExtra("PHOTO_URL",groupItemObjects.get(position).getPhotoUrl());
+                startActivity(intent);
+            }
+        });
+
         return view;
     }
 
@@ -78,7 +106,7 @@ public class GroupsFragment extends Fragment {
 
             DynamoDBMapper mapper = new DynamoDBMapper(ddbClient);
 
-            if(mapper != null) {
+            try{
                 DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
                 result = mapper.scan(GroupObject.class, scanExpression);
                 for(GroupObject i: result) {
@@ -86,10 +114,10 @@ public class GroupsFragment extends Fragment {
                     groupItemObjects.add(groupItemObject);
                     Log.v(TAG,"name: "+groupItemObject.getGroupName());
                 }
+            } catch (Exception e) {
+                Log.v(TAG,"Exception e: "+e);
             }
 
-            else
-                Log.v(TAG,"not saved");
 
             Log.v(TAG,"size: "+groupItemObjects.size());
             return "Executed";

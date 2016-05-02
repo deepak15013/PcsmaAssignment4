@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -16,40 +14,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.QueueingConsumer;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeoutException;
 
 import deepaksood.in.pcsmaassignment4.MainActivity;
+import deepaksood.in.pcsmaassignment4.PrefManager;
 import deepaksood.in.pcsmaassignment4.R;
 import deepaksood.in.pcsmaassignment4.chatpackage.ChatMessage;
 import deepaksood.in.pcsmaassignment4.chatpackage.ChatOneToOne;
 import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
 import deepaksood.in.pcsmaassignment4.servicepackage.RabbitMqService;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class ChatsFragment extends Fragment {
 
     public static final String TAG = ChatsFragment.class.getSimpleName();
+
+    //PrefManager prefManager;
+    public static final String KEY = "Object";
 
     ListView chatList;
 
@@ -58,31 +49,26 @@ public class ChatsFragment extends Fragment {
     private String profileNumber = "";
     private int lastObjectPosition;
     boolean alreadyPresent = false;
+    int numOfChats=0;
 
     public static List<ChatUserObject> chatUserObjects;
-//    List<String> contactsName;
 
-    public ChatsFragment() {
-        // Required empty public constructor
-    }
+    public ChatsFragment() {   }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         Log.v(TAG,"onCreate");
         super.onCreate(savedInstanceState);
 
-//        contactsName = new ArrayList<>();
         chatUserObjects = new ArrayList<>();
 
         getActivity().registerReceiver(broadcastReceiver, new IntentFilter(RabbitMqService.BROADCAST_ACTION));
-
-//        String[] contactsArrayName = new String[contactsName.size()];
-//        contactsArrayName = contactsName.toArray(contactsArrayName);
 
         chatAdapter = new ChatsListAdapter(getActivity(), chatUserObjects);
 
         MainActivity mainActivity = (MainActivity) getActivity();
         profileNumber = mainActivity.getMobileNumText();
+
     }
 
 
@@ -96,6 +82,7 @@ public class ChatsFragment extends Fragment {
         chatList = (ListView) view.findViewById(R.id.chat_list);
 
         chatList.setAdapter(chatAdapter);
+        //chatAdapter.notifyDataSetChanged();
 
         chatList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -104,7 +91,6 @@ public class ChatsFragment extends Fragment {
                 Log.v(TAG,"itemClicked: "+position);
                 Intent intent = new Intent(getActivity(),ChatOneToOne.class);
                 intent.putExtra("CHAT_USER_OBJECT",chatUserObjects.get(position));
-//                intent.putExtra("USER_NUMBER",contactsList.get(position));
                 intent.putExtra("PROFILE_NUMBER",profileNumber);
                 intent.putExtra("POSITION",position);
                 startActivityForResult(intent, 1);
@@ -131,7 +117,6 @@ public class ChatsFragment extends Fragment {
                 }
 
             }
-            //Log.v(TAG,"chatUserObject: "+chatUserObject.getChatMessages().get(0));
         }
         else{
             Log.v(TAG,"onActivityResult cancelled");
@@ -165,7 +150,7 @@ public class ChatsFragment extends Fragment {
             chatMessage.setMessage(pureMessage);
             chatMessage.setMe(false);
             chatMessage.setDate("today");
-            Log.v(TAG,"---------------"+message);
+            Log.v(TAG,message);
 
             for(int k=0; k< ContactsFragment.chatUserObjects.size();k++) {
                 if(ContactsFragment.chatUserObjects.get(k).getChatuserMobileNum().equals(sender)) {
@@ -203,6 +188,7 @@ public class ChatsFragment extends Fragment {
         }
     };
 
+    Gson gson = new Gson();
     @Override
     public void onPause() {
         super.onPause();
@@ -219,8 +205,8 @@ public class ChatsFragment extends Fragment {
     public void onDestroy() {
         Log.v(TAG,"onDestroy Contacts Fragment");
         super.onDestroy();
+
         if(broadcastReceiver != null)
             getActivity().unregisterReceiver(broadcastReceiver);
     }
-
 }

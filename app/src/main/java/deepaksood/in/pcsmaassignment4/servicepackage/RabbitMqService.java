@@ -54,7 +54,7 @@ public class RabbitMqService extends Service {
             @Override
             public void handleMessage(Message msg) {
                 String message = msg.getData().getString("msg");
-                Log.v(TAG,"Mesage: "+message+"--------------------------");
+                Log.v(TAG,"Mesage: "+message);
                 intent.putExtra("MESSAGE",message);
                 sendBroadcast(intent);
             }
@@ -92,15 +92,6 @@ public class RabbitMqService extends Service {
     public void setUpConnectionFactory() {
         connectionFactory.setAutomaticRecoveryEnabled(true);
         connectionFactory.setNetworkRecoveryInterval(10000);
-        /*try {
-            connectionFactory.setUri("amqp://pmkrlkkw:GB1jKxGoJX8ya_vywroGbvsdP3SQqFhI@fox.rmq.cloudamqp.com/pmkrlkkw");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        }*/
         connectionFactory.setHost("52.207.235.200");
         connectionFactory.setUsername("deepak");
         connectionFactory.setPassword("deepak");

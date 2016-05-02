@@ -38,9 +38,7 @@ public class ContactsFragment extends Fragment {
     CognitoCachingCredentialsProvider credentialsProvider;
     PaginatedScanList<UserObject> result;
 
-//    List<String> contactsList;
     List<String> contactsName;
-//    List<String> contactsPhotos;
 
     public static List<ChatUserObject> chatUserObjects;
 
@@ -48,23 +46,16 @@ public class ContactsFragment extends Fragment {
 
     private int lastObjectPosition;
 
-    public ContactsFragment() {
-        // Required empty public constructor
-    }
+    public ContactsFragment() { }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-//        contactsList = new ArrayList<>();
         contactsName = new ArrayList<>();
-//        contactsPhotos = new ArrayList<>();
         chatUserObjects = new ArrayList<>();
 
         MainActivity mainActivity = (MainActivity) getActivity();
         profileNumber = mainActivity.getMobileNumText();
-
-//        adapter = new ContactsListAdapter(getActivity(), web , mobileArray);
         new db().execute();
     }
 
@@ -87,6 +78,12 @@ public class ContactsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == 1) {
@@ -103,7 +100,6 @@ public class ContactsFragment extends Fragment {
                 }
 
             }
-            //Log.v(TAG,"chatUserObject: "+chatUserObject.getChatMessages().get(0));
         }
         else{
             Log.v(TAG,"onActivityResult cancelled");
@@ -123,12 +119,9 @@ public class ContactsFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-//                Toast.makeText(getActivity(), "pos: "+contactsList.get(position), Toast.LENGTH_SHORT).show();
-
                 lastObjectPosition = position;
                 Intent intent = new Intent(getActivity(),ChatOneToOne.class);
                 intent.putExtra("CHAT_USER_OBJECT",chatUserObjects.get(position));
-//                intent.putExtra("USER_NUMBER",contactsList.get(position));
                 intent.putExtra("PROFILE_NUMBER",profileNumber);
                 intent.putExtra("POSITION",position);
                 startActivityForResult(intent, 1);
@@ -160,10 +153,7 @@ public class ContactsFragment extends Fragment {
                 for(UserObject i: result) {
                     ChatUserObject chatUserObject = new ChatUserObject(i.getMobileNum(), i.getDisplayName(), i.getPhotoUrl(), i.getDisplayEmailId(), i.getCoverUrl());
                     chatUserObjects.add(chatUserObject);
-//                    Log.v(TAG,"Mobile Num Retrived: "+i.getMobileNum());
-//                    contactsList.add(i.getMobileNum());
                     contactsName.add(i.getDisplayName());
-//                    contactsPhotos.add(i.getPhotoUrl());
                 }
             }
 
@@ -176,14 +166,8 @@ public class ContactsFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             Log.v(TAG,"onPostExecute");
-//            String[] contactsArrayNumber = new String[contactsList.size()];
-//            contactsArrayNumber = contactsList.toArray(contactsArrayNumber);
-
             String[] contactsArrayName = new String[contactsName.size()];
             contactsArrayName = contactsName.toArray(contactsArrayName);
-
-//            String[] contactsArrayPhoto = new String[contactsPhotos.size()];
-//            contactsArrayPhoto = contactsPhotos.toArray(contactsArrayPhoto);
 
             adapter = new ContactsListAdapter(getActivity(), chatUserObjects, contactsArrayName);
             list.setAdapter(adapter);

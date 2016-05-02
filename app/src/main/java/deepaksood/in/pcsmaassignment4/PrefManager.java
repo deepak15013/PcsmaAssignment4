@@ -4,6 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import java.util.List;
+
+import deepaksood.in.pcsmaassignment4.chatpackage.ChatUserObject;
+
 /**
  * Created by deepak on 4/4/16.
  */
@@ -24,6 +28,8 @@ public class PrefManager {
     private static final String KEY_DISPLAY_EMAIL_ID = "displayEmailId";
     private static final String KEY_PHOTO_URL = "photoUrl";
     private static final String KEY_COVER_URL = "coverUrl";
+    private static final String KEY_CHAT = "chat";
+    private static final String KEY_NUM = "num";
 
 
     public PrefManager(Context context) {
@@ -52,6 +58,16 @@ public class PrefManager {
         editor.commit();
     }
 
+    public void saveChat(String chat) {
+        editor.putString(KEY_CHAT,chat);
+        editor.commit();
+    }
+
+    public void saveNumberOfChats(int num) {
+        editor.putInt(KEY_NUM,num);
+        editor.commit();
+    }
+
     public boolean isLoggedIn() {
         return pref.getBoolean(KEY_IS_LOGGED_IN,false);
     }
@@ -74,6 +90,14 @@ public class PrefManager {
 
     public String getCoverUrl() {
         return pref.getString(KEY_COVER_URL, "https://drive.google.com/uc?id=0B1jHFoEHN0zfek43ajZrMDZSSms");
+    }
+
+    public String getChat() {
+        return pref.getString(KEY_CHAT, "");
+    }
+
+    public int getNumChat() {
+        return pref.getInt(KEY_NUM,0);
     }
 
 }

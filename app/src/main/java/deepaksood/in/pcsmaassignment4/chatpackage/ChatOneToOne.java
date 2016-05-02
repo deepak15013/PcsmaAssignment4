@@ -69,8 +69,6 @@ public class ChatOneToOne extends AppCompatActivity {
         profileNumber = bundle.getString("PROFILE_NUMBER");
         chatUserObject = (ChatUserObject) getIntent().getSerializableExtra("CHAT_USER_OBJECT");
         position = bundle.getInt("POSITION");
-        Log.v(TAG,"Position clicked: "+position);
-        Log.v(TAG,"profileNumber: "+profileNumber);
         userNumber = chatUserObject.getChatuserMobileNum();
 
         for(ChatMessage i : chatUserObject.getChatMessages()) {

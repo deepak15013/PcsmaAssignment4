@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="deepaksood.in.pcsmaassignment4.groupchat.GroupChatActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/group_chat_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:popupTheme="@style/AppTheme.PopupOverlay">
+
+        <com.pkmmte.view.CircularImageView
+            android:id="@+id/iv_toolbar_group_pic"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ph_profile_picture"
+            app:border="true"
+            app:border_color="#000000"
+            app:border_width="1dp"
+            app:shadow="true" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_toolbar_group_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#FFFFFF"
+                android:text="Deepak Sood"/>
+
+            <TextView
+                android:id="@+id/tv_group_toolbar_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#FFFFFF"
+                android:text="9425592627"/>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.Toolbar>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/group_chat_toolbar">
+
+        <LinearLayout
+            android:id="@+id/ll_chatBox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp"
+            android:orientation="vertical"
+            android:layout_above="@+id/send_layout">
+
+            <ListView
+                android:id="@+id/message_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:transcriptMode="alwaysScroll"
+                android:listSelector="@android:color/transparent"
+                android:divider="@null">
+            </ListView>
+
+        </LinearLayout>
+
+        <View
+            android:layout_below="@+id/ll_chatBox"
+            android:layout_width="370dp"
+            android:layout_height="1dp"
+            android:background="#999999"
+            android:layout_centerHorizontal="true"
+            />
+
+        <LinearLayout
+            android:id="@+id/send_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="4dp"
+            android:paddingBottom="12dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp">
+
+            <EditText
+                android:id="@+id/et_send"
+                android:layout_width="250dp"
+                android:hint="Type a message..."
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/btn_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:text="SEND"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -40,7 +40,8 @@
             android:exported="false" />
 
         <activity android:name=".broadcastpackage.BroadcastActivity" />
-        <activity android:name=".addgrouppackage.AddGroup"></activity>
+        <activity android:name=".addgrouppackage.AddGroup" />
+        <activity android:name=".groupchat.GroupChatActivity"></activity>
     </application>
 
 </manifest>
